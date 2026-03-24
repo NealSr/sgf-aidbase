@@ -6,17 +6,17 @@ export default function Home() {
       <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center gap-12 py-32 px-16 bg-white dark:bg-black">
         <div className="flex items-center gap-8">
           <Image
-            src="/ctrl_aid_team_logo.svg"
-            alt="Ctrl+Aid Team logo"
-            width={150}
-            height={150}
+            src="/sgf_aidbase_logo.svg"
+            alt="SGF AidBase logo"
+            width={600}
+            height={600}
             priority
           />
           <Image
-            src="/sgf_aidbase_logo.svg"
-            alt="SGF AidBase logo"
-            width={150}
-            height={150}
+            src="/ctrl_aid_team_logo.svg"
+            alt="Ctrl+Aid Team logo"
+            width={600}
+            height={600}
             priority
           />
         </div>
