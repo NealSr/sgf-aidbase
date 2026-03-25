@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase, Category, Resource } from "@/lib/supabase";
 import SearchForm from "@/app/components/SearchForm";
+import PrintButton from "@/app/components/PrintButton";
 
 export default async function CategoryPage({
   params,
@@ -58,9 +59,12 @@ export default async function CategoryPage({
             {cat.description}
           </p>
         )}
-        <p className="text-sm" style={{ color: "var(--muted-light)" }}>
-          Showing {items.length} resource{items.length !== 1 ? "s" : ""}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm" style={{ color: "var(--muted-light)" }}>
+            Showing {items.length} resource{items.length !== 1 ? "s" : ""}
+          </p>
+          <PrintButton />
+        </div>
       </div>
 
       {/* Resource cards */}
