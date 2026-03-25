@@ -131,10 +131,10 @@ CREATE TRIGGER resources_updated_at
 
 ```sql
 INSERT INTO categories (name, slug, description, icon, display_order) VALUES
-  ('Food Assistance', 'food-assistance', 'Food banks, pantries, free meals, SNAP/EBT assistance, and grocery help for individuals and families in Springfield.', '🍎', 1),
-  ('Housing & Shelter', 'housing-shelter', 'Emergency shelters, transitional housing, rent assistance, and housing programs for those experiencing or at risk of homelessness.', '🏠', 2),
-  ('Utility & Bill Help', 'utility-bill-help', 'Help paying electric, gas, water, and other utility bills. Financial counseling and emergency assistance programs.', '💡', 3),
-  ('Transportation', 'transportation', 'Bus passes, rideshare assistance, gas vouchers, vehicle repair programs, and other help getting where you need to go.', '🚌', 4);
+  ('Food', 'food-assistance', 'Food banks, pantries, free meals, SNAP/EBT assistance, and grocery help for individuals and families in Springfield.', '🍎', 1),
+  ('Housing', 'housing-shelter', 'Emergency shelters, transitional housing, rent assistance, and housing programs for those experiencing or at risk of homelessness.', '🏠', 2),
+  ('Bills', 'utility-bill-help', 'Help paying electric, gas, water, and other utility bills. Financial counseling and emergency assistance programs.', '💡', 3),
+  ('Transit', 'transportation', 'Bus passes, rideshare assistance, gas vouchers, vehicle repair programs, and other help getting where you need to go.', '🚌', 4);
 ```
 
 ## Seed Data — Example Resources (To be replaced with REAL data from market research)
