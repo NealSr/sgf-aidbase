@@ -1,112 +1,118 @@
 # SGF AidBase — Demo Script (5 Minutes)
 
 ## Video Format
-- Screen recording of the live app + picture-in-picture of you talking (optional)
-- OR: talking head intro → screen recording → talking head outro
-- Keep it authentic. You don't need Hollywood production. You need passion and a working app.
+Screen recording of the live app + picture-in-picture of you (optional). Keep it authentic — passion beats polish.
 
-## The Script
+---
 
 ### 0:00 – 0:30 | The Hook
+
 > "If you needed food for your family tonight... would you know who to call?
 >
-> In Springfield, we have dozens of incredible organizations helping with food, housing, and bills. The problem isn't that help doesn't exist. The problem is that when you're in crisis, you don't know where to start looking.
+> In Springfield, we have dozens of incredible organizations helping with food, housing, utilities, and transportation. The problem isn't that help doesn't exist. The problem is that when you're in crisis, you don't know where to start.
 >
-> I'm [Name], and this is SGF AidBase."
+> I'm [Name]. This is Ctrl+Aid. And this is SGF AidBase."
 
-*[Show the app homepage on screen]*
+*[Show the app homepage]*
 
 ---
 
-### 0:30 – 1:00 | The Problem
-> "I spent Tuesday talking to organizations across Springfield — food banks, shelters, utility assistance programs. Every single one told me the same thing: people call them who should have called someone else, and people who need them never find them at all.
->
-> The information is out there. It's just scattered across dozens of websites, phone trees, and word of mouth. And when you're stressed, hungry, or scared — you don't have time to do research."
+### 0:30 – 1:15 | The Problem (with real validation)
 
-*[Optional: show a quote from your market research. "We get calls every day from people who don't know where to start." — a real org you talked to]*
+> "I didn't just assume this was a problem. On Tuesday, I visited the Springfield Public Library and talked to Lisa at the reference desk. She handed me this —"
+
+*[Show/flash the 11-page directory]*
+
+> "Eleven pages of resources. Updated November 2025. Four months old — and that's the best printed guide in the city.
+>
+> I asked Lisa: what's the biggest frustration people have when trying to find help? Her answer: *inconsistency*. Resources change their hours. They run out of food. Shelters fill up. The information is out there, but it's scattered and it goes stale.
+>
+> And here's the thing that really got me: Springfield ranks as the 13th most dangerous city in America for pedestrian fatalities. When someone walks across Kearney Street to reach a food bank that turns out to be closed... that's not just frustrating. It's dangerous."
 
 ---
 
-### 1:00 – 2:30 | The Solution (LIVE DEMO)
-> "SGF AidBase is simple. You tell it what you need, in your own words."
+### 1:15 – 2:45 | The Solution (LIVE DEMO)
 
-*[Type into the search bar: "I can't afford groceries this week"]*
-*[Show results loading, then the AI-generated empathetic summary + resource list]*
+> "SGF AidBase is simple. Tell it what you need, in your own words."
 
-> "The app understands what you're saying and connects you to real organizations that can help. No jargon. No phone trees. Just answers."
+*[Type: "I can't afford groceries this week"]*
+*[Show loading → AI summary → resource list with distance labels]*
+
+> "The app understands what you're saying and connects you to real organizations. See these distance labels? It knows where you are and shows the closest resource first. 'Walking distance, about 10 minutes.' That matters when you don't have a car."
 
 *[Click into a resource detail page]*
 
-> "Every listing has the address, phone number, hours, and who qualifies — everything you need to take the next step. One tap to call. One tap to open directions."
+> "Every listing has the address, phone, hours, eligibility — and one tap to call, one tap for walking directions. Not driving directions. Walking. Because that's the reality for many people who need these services."
 
-*[Show the "Call Now" and "Open in Maps" buttons]*
+*[Click back, show category cards]*
 
-> "You can also browse by category if you already know what you're looking for."
+> "We built around the Four Walls — the four things every person needs before anything else can matter. Food. Shelter. Utilities. Transportation."
 
-*[Click back, show category cards, click into Housing & Shelter]*
+*[Click into a category → show the resource list]*
 
-> "We built around the Four Walls — the four things every person needs before anything else can matter. Food. Shelter. Utilities. Transportation. That's our MVP."
+> "You can also browse directly by category. No AI required — and if you prefer to search without AI, there's a toggle for that too. Because AI should be a choice, not a requirement."
 
 ---
 
-### 2:30 – 3:30 | The How (Technical + AI Story)
-> "Here's how we built this in three days.
->
-> First, I used Traction Studio AI by Codefi to validate the problem — making sure this was something Springfield actually needed, not just something I thought was cool.
->
-> Then I used Claude by Anthropic to architect the solution and generate the code. The app is built with Next.js, uses Supabase for the database, and is deployed on [Vercel/Amplify].
->
-> The search feature is powered by Claude's AI — it takes natural language like 'my kids haven't eaten today' and understands the intent behind it. But the AI is invisible to the user. They just type what they need and get help. That's the whole point."
+### 2:45 – 3:30 | The How (Technical + AI Story)
 
-*[Optional: briefly show the Supabase dashboard or code editor to prove it's real]*
+> "Here's how we built this in 72 hours.
+>
+> First, I used Traction Studio AI by Codefi to validate the problem — making sure this was something Springfield actually needed.
+>
+> Then I used Claude by Anthropic to architect the entire solution — from the database schema to the AI matching prompts to the code itself. The app is built with Next.js, uses Supabase for the database, and deploys automatically to Vercel.
+>
+> The search is powered by Claude Sonnet. When you type your need, Claude reads your words, matches you to the right category, and even factors in the current time to reason about what's open right now. But the AI is invisible to the user. They just type what they need and get help."
+
+*[Briefly show Supabase dashboard or code to prove it's real]*
+
+> "36 real resources, sourced from organization websites and the Springfield Public Library's directory, with data verified through direct outreach."
 
 ---
 
 ### 3:30 – 4:15 | The Impact
-> "On Tuesday, I visited [X] organizations and talked to [social workers / case managers / staff]. Here's what I heard:
->
-> [Insert 1-2 real quotes from your research]
->
-> Every resource in this app is verified. I called the phone numbers. I checked the addresses. I confirmed the hours. Because when someone is looking for help, accuracy isn't a feature — it's a responsibility."
 
-> "SGF AidBase isn't replacing the incredible nonprofits in Springfield. It's the front door that helps people find them."
+> "The #1 insight from market research was this: the problem isn't finding resources. It's finding out they're *closed* when you get there. That's why every listing shows hours, and our AI factors in the current time. That's why we show distance, so people walk to the nearest option, not the one that looked good on Google.
+>
+> And that's why we built an admin portal and a feedback form — because a directory that can't be updated is a directory that lies to people. Organizations can update their own listings. Community members can report errors. The data stays fresh."
+
+> "We're not replacing the incredible nonprofits in Springfield. We're the front door that helps people find them."
 
 ---
 
 ### 4:15 – 4:45 | The Roadmap
-> "This is the MVP — built in 72 hours. But here's where it's headed:
+
+> "This is the MVP — built in 72 hours with one person and AI. Here's where it goes:
 >
-> - More categories: mental health, job training, childcare, transportation
-> - A community board where organizations and individuals can share resources
-> - Multilingual support — because Springfield's Spanish-speaking community deserves access too
-> - An 'Update this listing' feature so organizations can keep their own info current
+> - More categories: mental health, employment, dental, substance abuse — all sourced from that same library directory
+> - Multilingual support — Springfield's Spanish-speaking community deserves access too
+> - Bus route integration — show 'Take the Blue Line, 3 stops' right in the results
+> - SMS search — text your need to a number, get resources back — for people without smartphones
 >
-> The architecture is built to grow. The data model supports it. We just need time and community partnership."
+> The architecture supports all of this. We just need time and community partnership."
 
 ---
 
 ### 4:45 – 5:00 | The Close
+
 > "Springfield has the resources. Springfield has the heart. SGF AidBase just connects the two.
 >
-> I'm [Name]. This is Ctrl+Aid. And this is SGF AidBase."
+> I'm [Name]. This is Ctrl+Aid. Thank you."
 
-*[Show the app URL on screen: sgfaidbase.com or whatever the final URL is]*
-
-*[End]*
+*[Show sgfaidbase.org on screen]*
 
 ---
 
 ## Demo Tips
-- **Practice the live demo 3 times** before recording. Know exactly what you'll type and click.
-- **Pre-load the app** in your browser so there's no cold-start delay.
-- **Have a backup plan** if the AI search takes too long — pre-load a results page in another tab.
-- **Use your real voice.** Don't try to sound like a startup pitch video. Sound like you.
-- **If you get a quote from a real org on Tuesday, USE IT.** Nothing beats real validation.
-- **Keep the energy up at the end.** The last 15 seconds are what people remember.
-- **Show the URL.** Judges should be able to try it themselves. That's your mic drop.
+- **Practice 3 times** before recording
+- **Pre-load the app** — no cold starts during the demo
+- **Have a backup tab** with pre-loaded results in case the AI is slow
+- **Use your real voice.** Don't sound like a pitch video. Sound like you.
+- **Show the distance labels.** That's your differentiator.
+- **Show the library directory** — even a 2-second flash of those 11 pages is powerful
+- **End with the URL.** Judges should try it themselves.
 
 ## Recording Tools (Free)
-- **OBS Studio** — free screen recording with picture-in-picture
-- **Loom** — free tier allows 5-min recordings, easy to share
-- **QuickTime** (Mac) — built-in screen recording
-- **iPhone** — honestly, a phone screen recording works fine for authenticity
+- OBS Studio — screen recording with picture-in-picture
+- Loom — 5-min recordings on free tier
+- QuickTime (Mac) — built-in screen recording

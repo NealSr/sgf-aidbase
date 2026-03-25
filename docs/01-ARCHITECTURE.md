@@ -10,6 +10,11 @@
 │  │  Search   │  │  Category    │  │   Resource     │  │
 │  │  Bar      │  │  Browse      │  │   Detail View  │  │
 │  └─────┬────┘  └──────┬───────┘  └───────────────┘  │
+│        │               │                             │
+│  ┌─────┴───────────────┴──────────────────────────┐  │
+│  │  Browser Geolocation API (optional)            │  │
+│  │  → Haversine distance calc → walking labels    │  │
+│  └────────────────────────────────────────────────┘  │
 └────────┼───────────────┼─────────────────────────────┘
          │               │
          ▼               ▼
@@ -20,8 +25,9 @@
 │  │              API Routes (/api/*)              │   │
 │  │                                               │   │
 │  │  /api/search    — AI-powered query matching   │   │
+│  │                   + location + hours awareness │   │
 │  │  /api/resources — CRUD for resource listings  │   │
-│  │  /api/categories — Category metadata          │   │
+│  │  /api/feedback  — Community feedback intake    │   │
 │  └──────────┬──────────────────┬─────────────────┘   │
 │             │                  │                      │
 └─────────────┼──────────────────┼─────────────────────┘
@@ -32,109 +38,136 @@
 │  (Claude Sonnet) │   │  (PostgreSQL)    │
 │                  │   │                  │
 │  Smart matching  │   │  Resources table │
-│  & ranking       │   │  Categories table│
-│                  │   │  Full-text search│
+│  Hours reasoning │   │  Categories table│
+│  Location-aware  │   │  Feedback table  │
+│  ranking         │   │  Full-text search│
 └──────────────────┘   └──────────────────┘
 ```
 
-## Data Flow: User Searches "I can't pay my electric bill"
+## Data Flow: User Searches "I need food"
 
 1. User types query into search bar on homepage
-2. Frontend sends POST to `/api/search` with `{ query: "I can't pay my electric bill" }`
-3. API route checks: is this a direct category click or a natural language query?
-   - **Direct category click** → Query Supabase directly, skip Claude API (saves cost + latency)
-   - **Natural language query** → Continue to step 4
-4. API route sends query to Claude API (Sonnet model for speed + cost efficiency) with:
+2. Browser requests geolocation permission (optional)
+3. Frontend sends POST to `/api/search` with `{ query, latitude?, longitude? }`
+4. API route checks: is this a direct category click or a natural language query?
+   - **Direct category click** → Query Supabase directly, skip Claude API
+   - **Natural language query** → Continue to step 5
+5. API route sends query to Claude API (Sonnet model) with:
    - The user's query
-   - A list of all categories and their descriptions
-   - Instructions to return: matched category, confidence score, and a short empathetic summary
-5. Claude responds with structured JSON: `{ category: "utility_bill_help", confidence: 0.95, summary: "It sounds like you need help with utility bills. Here are organizations in Springfield that can help." }`
-6. API route queries Supabase for all resources in the matched category
-7. Results returned to frontend with the AI-generated summary at the top
-8. User sees: empathetic summary + list of organizations with name, address, phone, hours, description
+   - Current date/time (for hours reasoning)
+   - User's lat/lon if provided (for proximity awareness)
+   - Category definitions
+   - Instructions to return structured JSON with empathetic summary
+6. Claude responds with: `{ category, confidence, summary, secondary_category }`
+7. API route queries Supabase for all active resources in matched category
+8. Results returned to frontend with lat/lon per resource
+9. Frontend calculates distance (Haversine) and adds walking context labels
+10. Results sorted by nearest first, displayed with distance labels
 
-## Tech Stack Details
+## Distance Labels (Tier 2)
+| Distance | Label | Emoji |
+|---|---|---|
+| < 0.5 mi | Walking distance (~10 min) | 🚶 |
+| 0.5 - 1 mi | Walkable (~15-20 min) | 🚶 |
+| 1 - 3 mi | May need a bus or ride | 🚌 |
+| 3+ mi | You'll likely need transportation | 🚗 |
 
-### Frontend
-- **Next.js 14+** with App Router
-- **Tailwind CSS** for styling (fast to prototype, AI generates good Tailwind)
-- **React** components for search bar, resource cards, category grid
-- **No component library** — keep it lightweight, custom-styled
+## Hours Reasoning
+Hours are stored as free text in the database (e.g., "Mon-Thu 9:00 AM - 1:30 PM"). Instead of parsing these into structured time ranges, the current date/time is passed to Claude at query time. Claude reads the hours text and reasons about what's currently open, noting when closed resources will open next. This avoids complex time parsing while delivering good-enough results for MVP.
 
-### Backend (Next.js API Routes)
-- `/api/search` — POST — accepts natural language query, returns matched resources
-- `/api/resources` — GET — returns resources filtered by category
-- `/api/resources/[id]` — GET — returns single resource detail
-- *Future: admin routes for CRUD, but for MVP, data entry happens in Supabase dashboard*
-
-### Database (Supabase)
-- Hosted PostgreSQL with auto-generated REST API
-- Supabase JS client for querying from Next.js API routes
-- Full-text search enabled on resource name + description fields
-- Dashboard UI used for manual data entry during the hackathon
-
-### AI Layer (Anthropic Claude API)
-- Model: `claude-sonnet-4-20250514` (fast, cheap, plenty smart for matching)
-- Called from Next.js API route (server-side only — API key never exposed to browser)
-- Structured JSON output for reliable parsing
-- Fallback: if Claude API fails or times out, fall back to keyword-based Supabase full-text search
-
-### Deployment
-- **Primary: Vercel** — connect GitHub repo, auto-deploy on push
-- **Backup: AWS Amplify** — connect same GitHub repo, separate deployment
-- **Domain:** TBD (e.g., sgfaidbase.com or sgfaidbase.vercel.app for MVP)
-- **Environment Variables:**
-  - `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anonymous/public key
-  - `ANTHROPIC_API_KEY` — Claude API key (server-side only, NEVER in NEXT_PUBLIC_)
+## Tech Stack
+| Layer | Technology | Purpose |
+|---|---|---|
+| Frontend | Next.js 14+ (App Router) | Server-rendered React with API routes |
+| Styling | Tailwind CSS | Mobile-first responsive design |
+| Language | TypeScript | Type safety across the codebase |
+| Database | Supabase (PostgreSQL, us-east-2 Ohio) | Resource data, full-text search, feedback |
+| AI Matching | Anthropic Claude API (Sonnet) | Natural language query understanding |
+| Geocoding | OpenStreetMap Nominatim | One-time batch script to populate lat/lon |
+| Distance | Haversine formula (client-side JS) | Calculate user-to-resource distance |
+| Hosting Primary | Vercel | Auto-deploy from GitHub, SSL, CDN |
+| Hosting Backup | AWS Amplify | Same repo, fallback deployment |
+| DNS | Cloudflare | DNS management for sgfaidbase.org |
+| SSL | Let's Encrypt (auto via Vercel) | HTTPS by default |
 
 ## Project Structure
 
 ```
 sgf-aidbase/
+├── CLAUDE.md                   # Claude Code project context (auto-read)
 ├── app/
-│   ├── layout.tsx              # Root layout with header, footer, disclaimer
+│   ├── layout.tsx              # Root layout — header, footer, meta tags
 │   ├── page.tsx                # Homepage: hero + search bar + category cards
 │   ├── search/
-│   │   └── page.tsx            # Search results page
+│   │   └── page.tsx            # AI-powered search results with distance labels
 │   ├── category/
 │   │   └── [slug]/
 │   │       └── page.tsx        # Category browse page
 │   ├── resource/
 │   │   └── [id]/
-│   │       └── page.tsx        # Individual resource detail page
+│   │       └── page.tsx        # Resource detail page with call/map/directions
 │   ├── about/
-│   │   └── page.tsx            # About page (team, mission, credits)
+│   │   └── page.tsx            # About page — credits, methodology, crisis lines
+│   ├── feedback/
+│   │   └── page.tsx            # Community feedback form
+│   ├── admin/
+│   │   └── page.tsx            # Password-protected admin for resource CRUD
 │   └── api/
 │       ├── search/
 │       │   └── route.ts        # AI-powered search endpoint
-│       └── resources/
-│           └── route.ts        # Resource listing endpoint
+│       ├── resources/
+│       │   └── route.ts        # Resource listing endpoint
+│       └── feedback/
+│           └── route.ts        # Feedback submission endpoint
 ├── components/
-│   ├── SearchBar.tsx           # Main search input with submit
-│   ├── CategoryCard.tsx        # Clickable category tile
-│   ├── ResourceCard.tsx        # Resource listing card
-│   ├── ResourceDetail.tsx      # Full resource info display
-│   ├── Header.tsx              # App header with logo
-│   ├── Footer.tsx              # Footer with disclaimer + credits
-│   └── LoadingSpinner.tsx      # Loading state component
+│   ├── SearchBar.tsx
+│   ├── CategoryCard.tsx
+│   ├── ResourceCard.tsx        # Includes distance label display
+│   ├── ResourceDetail.tsx
+│   ├── Header.tsx
+│   ├── Footer.tsx              # Includes disclaimer + crisis numbers
+│   └── LoadingSpinner.tsx
 ├── lib/
-│   ├── supabase.ts             # Supabase client initialization
+│   ├── supabase.ts             # Supabase client + TypeScript types
 │   ├── anthropic.ts            # Claude API helper functions
-│   └── types.ts                # TypeScript type definitions
+│   ├── distance.ts             # Haversine formula + distance labels
+│   ├── location.ts             # Browser geolocation wrapper
+│   └── types.ts                # Shared type definitions
+├── scripts/
+│   └── geocode-resources.mjs   # One-time Nominatim geocoding script
+├── docs/                       # Blueprint documentation (for AI judge + humans)
 ├── public/
-│   ├── logo.svg                # SGF AidBase logo
-│   └── og-image.png            # Social share image
+│   ├── logo.svg
+│   └── og-image.png
 ├── .env.local                  # Environment variables (not committed)
-├── tailwind.config.ts          # Tailwind configuration
+├── .env.example                # Template showing required env vars
+├── tailwind.config.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
+## Environment Variables
+```
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+ANTHROPIC_API_KEY=sk-ant-...     # Server-side only — NEVER NEXT_PUBLIC_
+ADMIN_PASSWORD=...               # For /admin page
+```
+
 ## Security Considerations
 - Anthropic API key is server-side only (never prefixed with NEXT_PUBLIC_)
-- Supabase Row Level Security (RLS) enabled: public read-only, no public writes
-- No user authentication for MVP = no user data to protect
-- Rate limiting on /api/search to prevent abuse (Next.js middleware or Vercel's built-in)
+- Supabase Row Level Security: public read-only on resources/categories, insert-only on feedback
+- No user authentication for public features = no user data to protect
+- Rate limiting on /api/search (10 req/min per IP) to prevent abuse
+- Honeypot field on feedback form for spam prevention (no CAPTCHA — don't block people in crisis)
 - Input sanitization on search queries before passing to Claude API
+- Admin page uses simple password check (env var), not persistent auth
+
+## Fallback Strategy
+1. Claude API invalid JSON → fall back to Supabase full-text search
+2. Claude API timeout (>5s) → fall back to Supabase full-text search
+3. Claude API error → fall back to Supabase full-text search
+4. User declines geolocation → show results without distance, no penalty
+5. Vercel down → switch demo URL to Amplify deployment
+6. Always show results — never show the user an error page

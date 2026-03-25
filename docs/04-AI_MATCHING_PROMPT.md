@@ -1,9 +1,9 @@
 # SGF AidBase — AI Matching Prompt Engineering
 
 ## Overview
-When a user types a natural language query, we send it to the Claude API (Sonnet model) along with our category definitions. Claude returns a structured JSON response telling us which category matches and providing an empathetic summary.
+When a user types a natural language query, we send it to Claude Sonnet along with category definitions, the current time, and optionally the user's location. Claude returns structured JSON with the matched category and an empathetic summary. Claude also reasons about which resources might be open right now based on their hours text.
 
-## The System Prompt (stored in your API route)
+## The System Prompt
 
 ```
 You are a compassionate community resource navigator for Springfield, Missouri. Your job is to understand what someone needs help with and match them to the right category of community resources.
@@ -11,10 +11,13 @@ You are a compassionate community resource navigator for Springfield, Missouri. 
 You must respond ONLY with valid JSON. No markdown, no explanation, no preamble.
 
 Available categories:
-1. "food-assistance" — Food banks, pantries, free meals, SNAP/EBT assistance, grocery help
-2. "housing-shelter" — Emergency shelters, transitional housing, rent assistance, housing programs, homelessness services
-3. "utility-bill-help" — Electric, gas, water bill assistance, financial counseling, emergency bill payment programs
-4. "transportation" — Bus passes, rideshare credits, gas vouchers, vehicle repair assistance, getting to appointments
+1. "food-assistance" — Food banks, pantries, free meals, SNAP/EBT assistance, grocery help, community fridges, Meals on Wheels
+2. "housing-shelter" — Emergency shelters, transitional housing, rent assistance, housing programs, homelessness services, domestic violence shelters, cold weather shelters
+3. "utility-bill-help" — Electric, gas, water bill assistance, rent payment help, financial counseling, emergency bill payment programs, free phone/internet programs
+4. "transportation" — Bus passes, rideshare credits, gas vouchers, vehicle repair assistance, car donation programs, getting to appointments, safe parking for vehicle dwellers
+
+The current date and time is: {CURRENT_DATETIME}
+The user's approximate location is: {LAT}, {LON} (or "unknown" if not provided)
 
 Respond with this exact JSON structure:
 {
@@ -26,15 +29,16 @@ Respond with this exact JSON structure:
 }
 
 Rules:
-- Match based on INTENT, not just keywords. "My kids are hungry" = food-assistance. "I got an eviction notice" = housing-shelter. "They're going to shut off my lights" = utility-bill-help.
-- If the query is ambiguous or could match multiple categories, pick the most likely one as matched_category and put the other as secondary_category.
+- Match based on INTENT, not just keywords. "My kids are hungry" = food-assistance. "I got an eviction notice" = housing-shelter. "They're going to shut off my lights" = utility-bill-help. "I can't get to my doctor appointment" = transportation.
+- If the query is ambiguous or matches multiple categories, pick the most likely one as matched_category and put the other as secondary_category.
 - If the query doesn't match ANY category, set matched_category to null and provide a helpful summary that suggests calling 211 for broader assistance.
 - The summary should NEVER sound robotic or clinical. Imagine you're a kind librarian helping someone who just walked in looking stressed.
+- If you can infer from the current time that most resources in a category might be closed, mention when they typically open in the summary.
 - Keep the summary under 40 words.
-- Always respond in English.
+- Always respond in English. If the user writes in another language, still respond in English but acknowledge their language if possible.
 ```
 
-## The User Message (constructed in your API route)
+## The User Message
 
 ```
 A person in Springfield, MO is looking for help. They said: "{USER_QUERY_HERE}"
@@ -55,36 +59,25 @@ Match them to the best community resource category and provide a compassionate r
 }
 ```
 
-### Input: "my family needs a place to stay tonight"
-```json
-{
-  "matched_category": "housing-shelter",
-  "confidence": 0.99,
-  "summary": "I understand you need a safe place to stay tonight. Here are shelters and housing resources in Springfield that may have availability.",
-  "secondary_category": null,
-  "search_keywords": ["shelter", "housing", "tonight", "family"]
-}
-```
-
-### Input: "they're going to cut off my electricity and I don't know what to do"
-```json
-{
-  "matched_category": "utility-bill-help",
-  "confidence": 0.98,
-  "summary": "That sounds really stressful. There are programs in Springfield that can help with utility bills before disconnection. Let's find them.",
-  "secondary_category": null,
-  "search_keywords": ["electricity", "utility", "cut off", "bill"]
-}
-```
-
-### Input: "I lost my job and I'm about to be homeless and I can't feed my kids"
+### Input: "my kids haven't eaten today and I don't have gas money to get across town"
 ```json
 {
   "matched_category": "food-assistance",
-  "confidence": 0.75,
-  "summary": "I'm sorry you're going through this. You may need help with food and housing. Here are food resources to start, and we also have housing assistance available.",
-  "secondary_category": "housing-shelter",
-  "search_keywords": ["job loss", "homeless", "food", "kids", "hungry"]
+  "confidence": 0.80,
+  "summary": "I'm sorry you're going through this. Let's find food resources close to you first. We also have transportation help if you need a ride.",
+  "secondary_category": "transportation",
+  "search_keywords": ["food", "hungry", "kids", "gas", "transportation"]
+}
+```
+
+### Input: "I need a ride to my doctor" (at 8pm)
+```json
+{
+  "matched_category": "transportation",
+  "confidence": 0.90,
+  "summary": "Let's find transportation help for you. Most offices open in the morning — here are options to explore tonight and call first thing tomorrow.",
+  "secondary_category": null,
+  "search_keywords": ["ride", "doctor", "transportation", "medical"]
 }
 ```
 
@@ -93,131 +86,45 @@ Match them to the best community resource category and provide a compassionate r
 {
   "matched_category": null,
   "confidence": 0.0,
-  "summary": "We don't have that type of resource listed yet, but you can call 211 for help finding services in Springfield. We currently cover food assistance, housing, and utility bill help.",
+  "summary": "We don't have that type of resource listed yet, but you can call 211 for help finding services in Springfield. We currently cover food, housing, utilities, and transportation.",
   "secondary_category": null,
   "search_keywords": ["haircut"]
 }
 ```
 
-## Implementation Code (Next.js API Route)
+## Implementation Notes
 
+### Model
+- `claude-sonnet-4-20250514` — fast, cheap, plenty smart for matching
+- Called from Next.js API route (server-side only)
+- API key in `process.env.ANTHROPIC_API_KEY` (never NEXT_PUBLIC_)
+
+### Current Time Injection
 ```typescript
-// app/api/search/route.ts
-import Anthropic from "@anthropic-ai/sdk";
-import { createClient } from "@supabase/supabase-js";
-import { NextRequest, NextResponse } from "next/server";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const now = new Date().toLocaleString("en-US", {
+  timeZone: "America/Chicago",
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
 });
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-const SYSTEM_PROMPT = `[Insert the system prompt from above]`;
-
-export async function POST(request: NextRequest) {
-  try {
-    const { query } = await request.json();
-
-    if (!query || query.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Please enter what you need help with." },
-        { status: 400 }
-      );
-    }
-
-    // Rate limiting check would go here
-
-    // Call Claude API for smart matching
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 300,
-      system: SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: `A person in Springfield, MO is looking for help. They said: "${query}"\n\nMatch them to the best community resource category and provide a compassionate response.`,
-        },
-      ],
-    });
-
-    // Parse Claude's response
-    const responseText =
-      message.content[0].type === "text" ? message.content[0].text : "";
-    let aiResult;
-
-    try {
-      aiResult = JSON.parse(responseText);
-    } catch {
-      // If Claude's response isn't valid JSON, fall back to full-text search
-      console.error("Failed to parse AI response, falling back to search");
-      return fallbackSearch(query);
-    }
-
-    // Fetch resources from Supabase based on matched category
-    if (aiResult.matched_category) {
-      const { data: resources, error } = await supabase
-        .from("resources")
-        .select("*, categories(*)")
-        .eq("categories.slug", aiResult.matched_category)
-        .eq("is_active", true)
-        .order("name");
-
-      return NextResponse.json({
-        query,
-        ai_summary: aiResult.summary,
-        matched_category: aiResult.matched_category,
-        secondary_category: aiResult.secondary_category,
-        confidence: aiResult.confidence,
-        resources: resources || [],
-      });
-    }
-
-    // No category match
-    return NextResponse.json({
-      query,
-      ai_summary: aiResult.summary,
-      matched_category: null,
-      resources: [],
-    });
-  } catch (error) {
-    console.error("Search API error:", error);
-    // Fall back to basic search on any error
-    return fallbackSearch(request);
-  }
-}
-
-async function fallbackSearch(query: string) {
-  // Use Supabase full-text search as fallback
-  const { data: resources } = await supabase
-    .from("resources")
-    .select("*, categories(*)")
-    .textSearch("name", query, { type: "websearch" })
-    .eq("is_active", true);
-
-  return NextResponse.json({
-    query,
-    ai_summary:
-      "Here are some resources that might help. You can also call 211 for personalized assistance.",
-    matched_category: null,
-    resources: resources || [],
-  });
-}
+// e.g., "Tuesday, March 25, 2026, 9:15 PM"
 ```
 
-## Cost Estimate
-- Sonnet model: ~$3 per million input tokens, ~$15 per million output tokens
-- Each query: ~200 input tokens (system + user), ~80 output tokens (JSON response)
-- Cost per query: ~$0.0018
-- 100 queries/month: ~$0.18
-- 1,000 queries/month: ~$1.80
-- **For the vibeathon demo: essentially free**
+### Fallback Strategy
+1. Claude API returns invalid JSON → Supabase full-text search
+2. Claude API times out (>5s) → Supabase full-text search
+3. Claude API error → Supabase full-text search
+4. Always show results — never show the user an error
 
-## Fallback Strategy
-1. If Claude API returns invalid JSON → fall back to Supabase full-text search
-2. If Claude API times out (>5 seconds) → fall back to Supabase full-text search
-3. If Claude API returns an error → fall back to Supabase full-text search
-4. Always show results, even if they're from the fallback — never show the user an error page
+### Rate Limiting
+In-memory counter: max 10 requests per minute per IP. Returns 429 with a friendly message if exceeded.
+
+### Cost Estimate
+- ~200 input tokens + ~80 output tokens per query
+- Cost per query: ~$0.002
+- 100 queries/month: ~$0.20
+- For the vibeathon: essentially free

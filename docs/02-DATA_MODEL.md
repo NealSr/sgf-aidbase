@@ -1,5 +1,13 @@
 # SGF AidBase — Data Model (Supabase / PostgreSQL)
 
+## Current State
+- **4 categories** (Food Assistance, Housing & Shelter, Utility & Bill Help, Transportation)
+- **36 resources** across all categories
+- **Feedback table** for community corrections
+- Unique constraint on `(name, address)` for idempotent inserts
+- Full-text search index on name + description + eligibility
+- Row Level Security: public read on resources/categories, insert-only on feedback
+
 ## Tables
 
 ### categories

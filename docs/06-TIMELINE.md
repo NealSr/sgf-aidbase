@@ -1,99 +1,108 @@
-# SGF AidBase — Build Timeline
+# SGF AidBase — Build Timeline (Revised)
 
-## Monday Night (Tonight) — Foundation
-| Time | Task | Tool |
-|---|---|---|
-| NOW | ✅ Lock in architecture decisions | Claude (this chat) |
-| NOW | ✅ Generate blueprint files | Claude (this chat) |
-| Next | Sign up for Traction Studio AI | tractionstudio.ai |
-| Next | Run through Wave 1 idea validation | Traction Studio AI |
-| Next | Set up Supabase project | supabase.com |
-| Next | Create GitHub repo | github.com |
-| Next | Initialize Next.js project locally | Terminal |
-| Next | Push first commit, connect Vercel + Amplify | Vercel + AWS |
-| Before bed | Have a live (blank) app deployed at a real URL | 🎉 |
+## Monday Night (March 24) — COMPLETED ✅
+- Chose problem statement (community resource navigator)
+- Named team (Ctrl+Aid) and app (SGF AidBase)
+- Designed full architecture
+- Generated 8 blueprint documents
+- Signed up for Traction Studio AI
+- Created Supabase project + GitHub repo
+- Initialized Next.js project
+- Deployed to Vercel AND AWS Amplify
+- Registered sgfaidbase.org, configured DNS + SSL
+- Built placeholder homepage with Claude Code in VSCode
 
-## Tuesday Morning — Research & Data
-| Time | Task | Tool |
-|---|---|---|
-| 8:00 AM | Review market research questions | Blueprint doc 05 |
-| 8:30 AM | Finish Traction Studio Wave 1 if needed | Traction Studio AI |
-| 9:00 AM | Start calling/visiting organizations | Phone + notepad |
-| 12:00 PM | Lunch — compile research notes | Google Sheets |
-| 1:00 PM | Afternoon visits — more orgs + social workers | Phone + notepad |
-| 3:00 PM | Call 211 for additional data | Phone |
-| 4:00 PM | Return home — organize all collected data | Google Sheets |
+## Tuesday (March 25) — IN PROGRESS
+### Completed ✅
+- Email/web form outreach to 5 organizations
+- Received email responses
+- Library visit — interviewed Lisa at reference desk
+- Collected 11-page "Where to get help in Springfield" directory
+- Compiled 36 verified resources across 4 categories
+- Loaded categories + resources into Supabase
+- Updated all blueprint docs with current decisions
 
-## Tuesday Evening — Build Sprint 1
-| Time | Task | Tool |
-|---|---|---|
-| 5:00 PM | Enter real resource data into Supabase | Supabase dashboard |
-| 5:30 PM | Build homepage (search bar + category cards) | VSCode + Claude |
-| 7:00 PM | Build search results page | VSCode + Claude |
-| 8:30 PM | Wire up Supabase client + resource fetching | VSCode + Claude |
-| 9:30 PM | Build category browse page | VSCode + Claude |
-| 10:30 PM | Build resource detail page | VSCode + Claude |
-| 11:30 PM | Deploy to Vercel — test live | Git push |
-| Midnight | Review, fix bugs, polish | VSCode + Claude |
+### Tonight (build sprint)
+| Order | Task | Est. Time | Priority |
+|---|---|---|---|
+| 1 | Run geocoding script (populate lat/lon) | 5 min | Must |
+| 2 | Set up Supabase client (lib/supabase.ts) | 15 min | Must |
+| 3 | Wire homepage to real Supabase data | 45 min | Must |
+| 4 | Build category browse page | 30 min | Must |
+| 5 | Build resource detail page | 30 min | Must |
+| 6 | Build search results page with distance labels | 45 min | Must |
+| 7 | Build Claude API search endpoint | 45 min | Must |
+| 8 | Git push → test on sgfaidbase.org | 10 min | Must |
+| 9 | About page | 20 min | Should |
+| 10 | Feedback page + API route | 30 min | Should |
+| 11 | Layout polish (header, footer, meta tags) | 30 min | Should |
+| 12 | Admin page (password-protected) | 45 min | Should |
 
-## Wednesday — AI Integration + Polish
-| Time | Task | Tool |
-|---|---|---|
-| Morning | Wire up Claude API matching (/api/search) | VSCode + Claude |
-| Mid-day | Test search with real queries | Live app |
-| Afternoon | Office hours at STC Squared (if attending) | In-person |
-| Afternoon | Apply any feedback from office hours | VSCode + Claude |
-| Evening | Build About page | VSCode + Claude |
-| Evening | Polish: loading states, error handling, mobile responsive | VSCode + Claude |
-| Evening | Add meta tags, OG image for social sharing | VSCode + Claude |
-| Night | Full end-to-end testing on mobile + desktop | Phone + laptop |
-| Night | Deploy final build to both Vercel and Amplify | Git push |
-| Night | Pick winner: Vercel or Amplify for demo URL | Browser |
+**Must-haves: ~3.5 hours. Should-haves: +2 hours.**
 
-## Thursday — Demo Day
-| Time | Task | Tool |
-|---|---|---|
-| Morning | Final bug fixes and polish | VSCode + Claude |
-| Morning | Set up custom domain (if time allows) | Vercel/Amplify |
-| Midday | Write demo script (see doc 07) | Claude (this chat) |
-| Afternoon | Record 5-minute demo video | Screen recorder + camera |
-| Afternoon | Edit video if needed (keep it raw and authentic) | Simple editor |
-| Evening | Submit! | Vibeathon submission portal |
-| Evening | 🎉 | Monster Energy |
+## Wednesday (March 26) — Polish & Test
+| Task | Priority |
+|---|---|
+| Mobile testing on real phone | Must |
+| Fix any bugs from Tuesday build | Must |
+| Add remaining should-haves not completed Tuesday | Should |
+| Attend office hours (virtual or STC Squared) | Optional |
+| Speech-to-text mic button | Nice to have |
+| AI toggle (search with/without AI) | Nice to have |
+| OG image for social sharing | Nice to have |
+| Full end-to-end testing | Must |
+| Final deploy to both Vercel and Amplify | Must |
 
-## Friday — Demos + Judging
-| Time | Task | Tool |
-|---|---|---|
-| Per schedule | Demo presentations | Your voice + charm |
-| Per schedule | AI + human judging | 🤞 |
-| Per schedule | Closing event for winners | 🏆 |
+## Thursday (March 27) — Demo Day
+| Task | Priority |
+|---|---|
+| Final bug fixes and polish | Must |
+| Write/refine demo script | Must |
+| Record 5-minute demo video | Must |
+| Submit to vibeathon portal | Must |
+| Celebrate 🎉 | Must |
 
-## Priority Stack (If You Run Out of Time)
+## Friday (March 28) — Judging
+| Task | Priority |
+|---|---|
+| Demo presentations (per schedule) | Must |
+| AI + human judging | 🤞 |
+| Final task: reconcile /docs with actual implementation | Must |
 
-Must have (Thursday demo is broken without these):
-1. ✅ Homepage with search bar and category cards
-2. ✅ Search results page that shows real resources
-3. ✅ Category browse page
-4. ✅ At least 5 real resources per category in the database
-5. ✅ Deployed and accessible via a public URL
+## Priority Stack (If Running Low on Time)
 
-Should have (makes the demo significantly better):
-6. Claude API smart matching on search
-7. Resource detail page
-8. Mobile-responsive design
-9. About page with credits
+### Must have (demo is broken without these):
+1. Homepage with search bar and 4 category cards (real data)
+2. Category browse page showing resources
+3. Resource detail page with call/map links
+4. Claude API smart matching on search
+5. Search results with distance labels
+6. Deployed at sgfaidbase.org
 
-Nice to have (wow factor but not critical):
-10. Animated placeholder in search bar
-11. "Was this helpful?" feedback buttons
-12. Social sharing meta tags / OG image
-13. Loading animations
-14. Secondary category suggestions ("You might also need...")
+### Should have (significantly better demo):
+7. About page
+8. Feedback page
+9. Admin page
+10. Header/footer polish with crisis numbers
+11. Mobile-responsive verified on real device
+
+### Nice to have (wow factor):
+12. Speech-to-text mic button
+13. AI toggle
+14. OG image for social sharing
+15. Loading animations
+16. "Open now" indicators
+
+### Post-vibeathon:
+17. Multilingual support
+18. More categories (mental health, employment, etc.)
+19. Proper auth for admin
+20. Bus route integration
+21. Structured hours for real "open now" filtering
 
 ## Emergency Fallbacks
-- **Claude API not working?** → Fall back to Supabase full-text search. Still works, just less magical.
-- **Vercel deploy broken?** → Switch demo URL to Amplify deployment.
-- **Supabase down?** → Extremely unlikely, but you could hardcode a JSON file as last resort.
-- **Running out of Claude Pro tokens?** → Switch to Sonnet for chat, save Opus for complex architecture questions.
-- **Teammate flakes?** → You were prepared to go solo anyway. You've got this.
-- **YOU run out of energy?** → Sleep. Seriously. A well-rested demo beats a buggy all-nighter every time.
+- Claude API not working → Supabase full-text search still works
+- Vercel down → Switch demo URL to Amplify
+- Geolocation declined → Results without distance, no penalty
+- Running out of Claude Pro tokens → Switch to Sonnet for chat
+- You run out of energy → Sleep. A rested demo beats a buggy all-nighter.
