@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 
 const EXAMPLE_QUERIES = [
   "I need food for my family",
@@ -9,6 +9,11 @@ const EXAMPLE_QUERIES = [
   "I need a safe place to sleep tonight",
   "I need help getting across town",
 ];
+
+// Check once whether the browser supports Web Speech API
+const hasSpeechSupport =
+  typeof window !== "undefined" &&
+  ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
 
 export default function SearchForm({
   initialQuery = "",
@@ -24,6 +29,62 @@ export default function SearchForm({
     if (typeof window === "undefined") return true;
     return localStorage.getItem("sgf-ai-search") !== "off";
   });
+
+  // Speech-to-text state
+  const [listening, setListening] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
+
+  // Auto-submit: navigate to search with the given text
+  const navigateToSearch = useCallback(
+    (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      setQuery(trimmed);
+      const params = new URLSearchParams({ q: trimmed });
+      if (!useAI) params.set("ai", "0");
+      router.push(`/search?${params.toString()}`);
+    },
+    [useAI, router]
+  );
+
+  function startListening() {
+    setMicError(null);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+
+    const recognition = new SR();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognitionRef.current = recognition;
+
+    recognition.onresult = (event: { results: { transcript: string }[][] }) => {
+      const transcript = event.results[0][0].transcript;
+      setListening(false);
+      navigateToSearch(transcript);
+    };
+
+    recognition.onerror = (event: { error: string }) => {
+      setListening(false);
+      if (event.error === "not-allowed") {
+        setMicError("Microphone access is needed for voice search.");
+      }
+    };
+
+    recognition.onend = () => setListening(false);
+
+    recognition.start();
+    setListening(true);
+  }
+
+  function stopListening() {
+    recognitionRef.current?.stop();
+    setListening(false);
+  }
 
   function toggleAI() {
     const next = !useAI;
@@ -82,6 +143,27 @@ export default function SearchForm({
               color: "var(--foreground)",
             }}
           />
+          {/* Mic button — only rendered if browser supports Web Speech API */}
+          {hasSpeechSupport && (
+            <button
+              type="button"
+              onClick={listening ? stopListening : startListening}
+              className="px-3 py-3 rounded-xl border text-base transition-colors no-print"
+              style={{
+                borderColor: listening ? "#B33A3A" : "var(--search-border)",
+                background: listening ? "#B33A3A" : "var(--search-bg)",
+                color: listening ? "#fff" : "var(--muted)",
+              }}
+              title={listening ? "Stop listening" : "Voice search"}
+              aria-label={listening ? "Stop listening" : "Voice search"}
+            >
+              {listening ? (
+                <span className="animate-pulse">⏺</span>
+              ) : (
+                "🎤"
+              )}
+            </button>
+          )}
           <button
             type="submit"
             className="px-5 py-3 rounded-xl text-white font-medium text-base transition-colors"
@@ -107,6 +189,13 @@ export default function SearchForm({
         >
           {useAI ? "🤖 AI Search: On" : "🔍 AI Search: Off"}
         </button>
+
+        {/* Mic permission error */}
+        {micError && (
+          <p className="mt-2 text-xs" style={{ color: "#B33A3A" }}>
+            {micError}
+          </p>
+        )}
       </form>
 
       {/* Example query chips */}
