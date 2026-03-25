@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import SearchForm from "@/app/components/SearchForm";
 import { Resource } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distance";
@@ -23,46 +23,30 @@ function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") ?? "";
 
-  const [loading, setLoading] = useState(true);
+  // Only show loading state if there's a query to search for
+  const [loading, setLoading] = useState(!!query);
   const [result, setResult] = useState<SearchResult | null>(null);
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
   } | null>(null);
 
-  // Request user location on mount
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserLocation({
-            lat: pos.coords.latitude,
-            lon: pos.coords.longitude,
-          });
-        },
-        () => {
-          // User declined or error — proceed without location
-        }
-      );
-    }
-  }, []);
+  // Track whether initial fetch has fired to avoid duplicate calls
+  const hasFetched = useRef(false);
 
-  // Fetch search results when query changes
-  useEffect(() => {
-    if (!query) {
-      setLoading(false);
-      return;
-    }
-
+  /** POST to /api/search and update state with results */
+  function fetchResults(
+    q: string,
+    loc: { lat: number; lon: number } | null
+  ) {
     setLoading(true);
-
     fetch("/api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query,
-        latitude: userLocation?.lat,
-        longitude: userLocation?.lon,
+        query: q,
+        latitude: loc?.lat,
+        longitude: loc?.lon,
       }),
     })
       .then((res) => res.json())
@@ -74,7 +58,38 @@ function SearchResults() {
         setResult(null);
         setLoading(false);
       });
-  }, [query, userLocation]);
+  }
+
+  // On mount: request geolocation, then fetch results.
+  // If geolocation resolves, re-fetch with location for distance sorting.
+  useEffect(() => {
+    if (!query) return;
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+          setUserLocation(loc);
+          // Re-fetch with location so results include distance data
+          fetchResults(query, loc);
+        },
+        () => {
+          // User declined — fetch without location
+          if (!hasFetched.current) {
+            hasFetched.current = true;
+            fetchResults(query, null);
+          }
+        }
+      );
+    }
+
+    // Fire initial fetch immediately (geolocation callback may be slow)
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchResults(query, null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Add distance info and sort by nearest
   const resourcesWithDistance: ResourceWithDistance[] = (

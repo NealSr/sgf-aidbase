@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase, Resource, Category } from "@/lib/supabase";
 import BackButton from "./BackButton";
@@ -47,14 +48,14 @@ export default async function ResourcePage({
           background: "var(--card-bg)",
         }}
       >
-        <a href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <span className="text-2xl" role="img" aria-label="SGF AidBase logo">
             🤝
           </span>
           <span className="text-xl font-semibold tracking-tight">
             SGF AidBase
           </span>
-        </a>
+        </Link>
       </header>
 
       <main className="flex-1 flex flex-col items-center px-6 py-10">
