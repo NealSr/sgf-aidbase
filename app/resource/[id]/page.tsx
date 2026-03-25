@@ -5,6 +5,7 @@ import BackButton from "./BackButton";
 import ShareButton from "./ShareButton";
 import FeedbackButtons from "./FeedbackButtons";
 import PrintButton from "@/app/components/PrintButton";
+import PhoneLink from "@/app/components/PhoneLink";
 
 export default async function ResourcePage({
   params,
@@ -132,19 +133,13 @@ export default async function ResourcePage({
               <div className="flex items-start gap-2">
                 <span className="text-base mt-0.5">📞</span>
                 <div>
-                  <p
-                    className="text-sm"
-                    style={{ color: "var(--foreground)" }}
-                  >
-                    {item.phone}
-                  </p>
-                  <a
-                    href={`tel:${item.phone}`}
-                    className="text-sm font-medium"
+                  <PhoneLink
+                    phone={item.phone}
+                    className="text-sm font-medium underline"
                     style={{ color: "var(--accent)" }}
                   >
-                    Call Now →
-                  </a>
+                    {item.phone} · Call Now →
+                  </PhoneLink>
                 </div>
               </div>
             )}
