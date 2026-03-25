@@ -34,6 +34,7 @@ type ResourceWithDistance = Resource & {
 function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") ?? "";
+  const useAI = searchParams.get("ai") !== "0";
 
   // Only show loading state if there's a query to search for
   const [loading, setLoading] = useState(!!query);
@@ -59,6 +60,7 @@ function SearchResults() {
         query: q,
         latitude: loc?.lat,
         longitude: loc?.lon,
+        useAI,
       }),
     })
       .then((res) => res.json())
@@ -273,8 +275,8 @@ function SearchResults() {
           {/* Results (normal, non-crisis) */}
           {!loading && result && !result.crisis && resourcesWithDistance.length > 0 && (
             <>
-              {/* AI Summary */}
-              {result.summary && (
+              {/* AI Summary (only when AI is on) */}
+              {useAI && result.summary && (
                 <div
                   className="rounded-2xl border p-5 mb-6"
                   style={{
@@ -295,6 +297,16 @@ function SearchResults() {
                     {result.summary}
                   </p>
                 </div>
+              )}
+
+              {/* Plain text header when AI is off */}
+              {!useAI && (
+                <p
+                  className="text-base font-medium mb-4"
+                  style={{ color: "var(--foreground)" }}
+                >
+                  Showing results for: &ldquo;{query}&rdquo;
+                </p>
               )}
 
               {/* Resource count */}

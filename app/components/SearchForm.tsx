@@ -19,17 +19,34 @@ export default function SearchForm({
 }) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
+  // Lazy init from localStorage — avoids setState-in-effect lint error
+  const [useAI, setUseAI] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("sgf-ai-search") !== "off";
+  });
+
+  function toggleAI() {
+    const next = !useAI;
+    setUseAI(next);
+    localStorage.setItem("sgf-ai-search", next ? "on" : "off");
+  }
+
+  function buildSearchUrl(q: string) {
+    const params = new URLSearchParams({ q });
+    if (!useAI) params.set("ai", "0");
+    return `/search?${params.toString()}`;
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (query.trim()) {
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+      router.push(buildSearchUrl(query.trim()));
     }
   }
 
   function handleChipClick(example: string) {
     setQuery(example);
-    router.push(`/search?q=${encodeURIComponent(example)}`);
+    router.push(buildSearchUrl(example));
   }
 
   return (
@@ -79,6 +96,17 @@ export default function SearchForm({
             Search
           </button>
         </div>
+
+        {/* AI toggle — subtle power-user control */}
+        <button
+          type="button"
+          onClick={toggleAI}
+          className="mt-2 text-xs flex items-center gap-1.5 no-print"
+          style={{ color: "var(--muted-light)" }}
+          title="Search without AI assistance"
+        >
+          {useAI ? "🤖 AI Search: On" : "🔍 AI Search: Off"}
+        </button>
       </form>
 
       {/* Example query chips */}
