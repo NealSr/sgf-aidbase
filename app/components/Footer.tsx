@@ -18,7 +18,7 @@ export default function Footer() {
         {/* Credits */}
         <p className="text-sm mb-2">
           Built with <span style={{ color: "var(--accent)" }}>♥</span> by
-          Ctrl+Aid for Springfield
+          Ctrl+Aid+Shift for Springfield
         </p>
 
         {/* Nav links */}

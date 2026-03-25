@@ -37,7 +37,7 @@
 │  │ 💡 Bills │ │ 🚌 Transit│            │
 │  └──────────┘ └──────────┘             │
 ├─────────────────────────────────────────┤
-│  Disclaimer · 988 · 911 · Ctrl+Aid     │
+│  Disclaimer · 988 · 911 · Ctrl+Aid+Shift│
 └─────────────────────────────────────────┘
 ```
 
@@ -137,7 +137,7 @@ Same card layout as search results but without AI summary card. Direct Supabase 
 
 ## Screen 5: About Page (app/about/page.tsx)
 
-Sections: What is SGF AidBase, How it works, Who built this (Ctrl+Aid, Traction Studio, Claude, Supabase), Credits (library, organizations), Data accuracy note + link to feedback, Crisis resources (988, 911, DV hotline, 211).
+Sections: What is SGF AidBase, How it works, Who built this (Ctrl+Aid+Shift, Traction Studio, Claude, Supabase), Credits (library, organizations), Data accuracy note + link to feedback, Crisis resources (988, 911, DV hotline, 211).
 
 ## Screen 6: Feedback Page (app/feedback/page.tsx)
 
@@ -153,5 +153,5 @@ Password prompt on load (checks against ADMIN_PASSWORD env var). Once authentica
 - **CategoryCard** — emoji icon, title, clickable, links to /category/[slug]
 - **ResourceCard** — name, address, phone, hours, distance label, "View Details" link
 - **Header** — logo left, About + Feedback links right, sticky
-- **Footer** — disclaimer, crisis lines, "Built with ♥ by Ctrl+Aid", data source date
+- **Footer** — disclaimer, crisis lines, "Built with ♥ by Ctrl+Aid+Shift", data source date
 - **LoadingSpinner** — "Finding resources for you..."

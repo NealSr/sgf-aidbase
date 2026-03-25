@@ -89,7 +89,7 @@ sgf-aidbase/
 │   ├── category/[slug]/page.tsx # Category browse
 │   ├── resource/[id]/page.tsx  # Resource detail
 │   ├── feedback/page.tsx       # Community feedback form
-│   ├── about/page.tsx          # About Ctrl+Aid
+│   ├── about/page.tsx          # About Ctrl+Aid+Shift
 │   └── api/
 │       ├── search/route.ts     # AI matching endpoint
 │       ├── resources/route.ts  # Resource listing endpoint
@@ -159,7 +159,7 @@ Automated testing planned with Playwright for post-MVP.
 
 ## Team
 
-**Ctrl+Aid** — Built for Springfield Tech Week 2026 Vibeathon
+**Ctrl+Aid+Shift** — Shift the way Springfield finds help. Built for Springfield Tech Week 2026 Vibeathon
 
 > *"Springfield has the resources. Springfield has the heart. SGF AidBase just connects the two."*
 
