@@ -7,6 +7,7 @@ import { supabase, Resource, Category } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distance";
 import { getDistanceLabel } from "@/lib/location";
 import PhoneLink from "@/app/components/PhoneLink";
+import HoursIndicator from "@/app/components/HoursIndicator";
 
 /** Resource enriched with distance and category info for display */
 type NearbyResource = Resource & {
@@ -211,6 +212,7 @@ function NearbyResults() {
                         style={{ color: "var(--muted)" }}
                       >
                         🕐 {resource.hours}
+                        <HoursIndicator hours={resource.hours} />
                       </p>
                     )}
                   </div>

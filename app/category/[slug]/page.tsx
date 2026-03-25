@@ -4,6 +4,7 @@ import { supabase, Category, Resource } from "@/lib/supabase";
 import SearchForm from "@/app/components/SearchForm";
 import PrintButton from "@/app/components/PrintButton";
 import PhoneLink from "@/app/components/PhoneLink";
+import HoursIndicator from "@/app/components/HoursIndicator";
 
 export default async function CategoryPage({
   params,
@@ -105,6 +106,7 @@ export default async function CategoryPage({
               {resource.hours && (
                 <p className="text-sm" style={{ color: "var(--muted)" }}>
                   🕐 {resource.hours}
+                  <HoursIndicator hours={resource.hours} />
                 </p>
               )}
             </div>

@@ -6,6 +6,7 @@ import ShareButton from "./ShareButton";
 import FeedbackButtons from "./FeedbackButtons";
 import PrintButton from "@/app/components/PrintButton";
 import PhoneLink from "@/app/components/PhoneLink";
+import HoursIndicator from "@/app/components/HoursIndicator";
 
 export default async function ResourcePage({
   params,
@@ -207,6 +208,7 @@ export default async function ResourcePage({
             </h2>
             <p className="text-sm" style={{ color: "var(--foreground)" }}>
               {item.hours}
+              <HoursIndicator hours={item.hours} />
             </p>
           </div>
         )}

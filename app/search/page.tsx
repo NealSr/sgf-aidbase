@@ -8,6 +8,7 @@ import { Resource } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distance";
 import { getDistanceLabel } from "@/lib/location";
 import PhoneLink from "@/app/components/PhoneLink";
+import HoursIndicator from "@/app/components/HoursIndicator";
 
 /** Crisis resource returned when crisis language is detected */
 type CrisisResource = {
@@ -360,6 +361,7 @@ function SearchResults() {
                           style={{ color: "var(--muted)" }}
                         >
                           🕐 {resource.hours}
+                          <HoursIndicator hours={resource.hours} />
                         </p>
                       )}
                     </div>
