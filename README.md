@@ -147,11 +147,15 @@ npm run dev
 
 ### Environment Variables
 ```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
+NEXT_PUBLIC_SUPABASE_URL=https://your-unique-domain.supabase.co/
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+ANTHROPIC_API_KEY=sk-ant-apixxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ADMIN_PASSWORD=your_admin_page_password
 ```
+
+## Testing
+Manual test plan available in `/docs/12-TEST_PLAN.md`.
+Automated testing planned with Playwright for post-MVP.
 
 ## Team
 
