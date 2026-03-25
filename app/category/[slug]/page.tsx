@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { supabase, Category, Resource } from "@/lib/supabase";
 import SearchForm from "@/app/components/SearchForm";
 import PrintButton from "@/app/components/PrintButton";
+import PhoneLink from "@/app/components/PhoneLink";
 
 export default async function CategoryPage({
   params,
@@ -95,13 +96,10 @@ export default async function CategoryPage({
               {resource.phone && (
                 <p className="text-sm">
                   <span style={{ color: "var(--muted)" }}>📞 </span>
-                  <a
-                    href={`tel:${resource.phone}`}
-                    className="underline"
+                  <PhoneLink
+                    phone={resource.phone}
                     style={{ color: "var(--accent)" }}
-                  >
-                    {resource.phone}
-                  </a>
+                  />
                 </p>
               )}
               {resource.hours && (

@@ -6,6 +6,7 @@ import { useEffect, useState, useRef, Suspense } from "react";
 import { supabase, Resource, Category } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distance";
 import { getDistanceLabel } from "@/lib/location";
+import PhoneLink from "@/app/components/PhoneLink";
 
 /** Resource enriched with distance and category info for display */
 type NearbyResource = Resource & {
@@ -198,13 +199,10 @@ function NearbyResults() {
                     {resource.phone && (
                       <p className="text-sm">
                         <span style={{ color: "var(--muted)" }}>📞 </span>
-                        <a
-                          href={`tel:${resource.phone}`}
-                          className="underline"
+                        <PhoneLink
+                          phone={resource.phone}
                           style={{ color: "var(--accent)" }}
-                        >
-                          {resource.phone}
-                        </a>
+                        />
                       </p>
                     )}
                     {resource.hours && (

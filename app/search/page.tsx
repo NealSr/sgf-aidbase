@@ -7,6 +7,7 @@ import SearchForm from "@/app/components/SearchForm";
 import { Resource } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distance";
 import { getDistanceLabel } from "@/lib/location";
+import PhoneLink from "@/app/components/PhoneLink";
 
 /** Crisis resource returned when crisis language is detected */
 type CrisisResource = {
@@ -347,13 +348,10 @@ function SearchResults() {
                       {resource.phone && (
                         <p className="text-sm">
                           <span style={{ color: "var(--muted)" }}>📞 </span>
-                          <a
-                            href={`tel:${resource.phone}`}
-                            className="underline"
+                          <PhoneLink
+                            phone={resource.phone}
                             style={{ color: "var(--accent)" }}
-                          >
-                            {resource.phone}
-                          </a>
+                          />
                         </p>
                       )}
                       {resource.hours && (
