@@ -10,9 +10,15 @@ const EXAMPLE_QUERIES = [
   "I need help getting across town",
 ];
 
-export default function SearchForm() {
+export default function SearchForm({
+  initialQuery = "",
+  showChips = true,
+}: {
+  initialQuery?: string;
+  showChips?: boolean;
+}) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -76,7 +82,7 @@ export default function SearchForm() {
       </form>
 
       {/* Example query chips */}
-      <div className="flex flex-wrap justify-center gap-2 mb-12 max-w-xl">
+      {showChips && <div className="flex flex-wrap justify-center gap-2 mb-12 max-w-xl">
         {EXAMPLE_QUERIES.map((example) => (
           <button
             key={example}
@@ -100,7 +106,7 @@ export default function SearchForm() {
             &ldquo;{example}&rdquo;
           </button>
         ))}
-      </div>
+      </div>}
     </>
   );
 }
