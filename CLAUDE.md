@@ -40,7 +40,7 @@ Warm, trustworthy, accessible. Earth tones — forest green accents (#2D6A4F), c
 - Crisis numbers (988, 911) in footer on every page
 
 ## Important Context
-- Team: Ctrl+Aid (solo — one human (Neal Richardson Sr) + AI (Claude Code))
+- Team: Ctrl+Aid+Shift (solo — one human (Neal Richardson Sr) + AI (Claude Code))
 - Competition: Springfield MO Vibeathon, Springfield Tech Week March 2026
 - Market research validated by Springfield Public Library reference desk and a few other community members.
 - 36 resources verified from org websites + library's 11-page directory

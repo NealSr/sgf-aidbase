@@ -43,7 +43,7 @@ export default function AboutPage() {
         {/* Who built this? */}
         <Section title="Who built this?">
           <p>
-            SGF AidBase was built by Ctrl+Aid during Springfield Tech Week
+            SGF AidBase was built by Ctrl+Aid+Shift during Springfield Tech Week
             2026.
           </p>
           <p>

@@ -71,7 +71,7 @@ These are harder to reach directly, but you can find them through:
 ## What to Bring
 - [ ] Phone (for recording with permission, or just taking notes)
 - [ ] Notebook and pen (old school backup)
-- [ ] A 30-second verbal pitch rehearsed: "Hi, I'm [Name] from Ctrl+Aid. We're building a free app for Springfield Tech Week that helps people find community resources like food banks, shelters, and utility assistance — just by typing what they need. I'm doing some research today to make sure we get it right. Do you have 5 minutes?"
+- [ ] A 30-second verbal pitch rehearsed: "Hi, I'm [Name] from Ctrl+Aid+Shift. We're building a free app for Springfield Tech Week that helps people find community resources like food banks, shelters, and utility assistance — just by typing what they need. I'm doing some research today to make sure we get it right. Do you have 5 minutes?"
 - [ ] Business card or a QR code linking to... something (even a simple landing page)
 - [ ] Screenshot/mockup of the app concept on your phone (we can generate this tonight)
 

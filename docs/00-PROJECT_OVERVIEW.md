@@ -4,7 +4,7 @@
 SGF AidBase is a community resource navigator for Springfield, Missouri. People in need type what they're struggling with in plain English — "I can't afford groceries" or "my family needs a place to stay tonight" — and the app instantly connects them with local organizations that can help. No jargon, no phone trees, no guessing who to call.
 
 ## Team
-- **Team Name:** Ctrl+Aid (solo — one human + AI collaboration)
+- **Team Name:** Ctrl+Aid+Shift (solo — one human + AI collaboration)
 - **Team Members:** Neal Richardson Sr + Claude Code
 - **Competition:** Springfield, MO Vibeathon (Springfield Tech Week, March 2026)
 - **Sponsor:** vibeathon.us Powered by Codefi

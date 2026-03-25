@@ -229,7 +229,7 @@ Content:
   - "You can also browse by category or turn off AI matching and search directly."
 
 - Section: "Who built this?"
-  - "SGF AidBase was built by Ctrl+Aid during Springfield Tech Week 2026."
+  - "SGF AidBase was built by Ctrl+Aid+Shift during Springfield Tech Week 2026."
   - "We used Traction Studio AI by Codefi to validate the problem, Claude by Anthropic to architect and build the solution, and feedback from Springfield librarians and community organizations to make sure we got it right."
 
 - Section: "Credits & Acknowledgments"
@@ -295,7 +295,7 @@ Update the root layout (app/layout.tsx) and any shared components to include:
    - Mobile: hamburger menu or just show both links (they're small enough)
 
 2. Footer:
-   - "Built with ♥ by Ctrl+Aid for Springfield"
+   - "Built with ♥ by Ctrl+Aid+Shift for Springfield"
    - Links to: About, Feedback, GitHub repo (https://github.com/NealSr/sgf-aidbase)
    - Disclaimer: "SGF AidBase helps connect you with community resources. Always verify details directly with the organization."
    - Crisis line: "In crisis? Call or text 988 · Call 911 for emergencies"

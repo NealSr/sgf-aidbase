@@ -11,7 +11,7 @@ Screen recording of the live app + picture-in-picture of you (optional). Keep it
 >
 > In Springfield, we have dozens of incredible organizations helping with food, housing, utilities, and transportation. The problem isn't that help doesn't exist. The problem is that when you're in crisis, you don't know where to start.
 >
-> I'm [Name]. This is Ctrl+Aid. And this is SGF AidBase."
+> I'm [Name]. This is Ctrl+Aid+Shift. And this is SGF AidBase."
 
 *[Show the app homepage]*
 
@@ -97,7 +97,7 @@ Screen recording of the live app + picture-in-picture of you (optional). Keep it
 
 > "Springfield has the resources. Springfield has the heart. SGF AidBase just connects the two.
 >
-> I'm [Name]. This is Ctrl+Aid. Thank you."
+> I'm [Name]. This is Ctrl+Aid+Shift. Thank you."
 
 *[Show sgfaidbase.org on screen]*
 

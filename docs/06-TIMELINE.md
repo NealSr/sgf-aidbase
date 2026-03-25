@@ -2,7 +2,7 @@
 
 ## Monday Night (March 24) — COMPLETED ✅
 - Chose problem statement (community resource navigator)
-- Named team (Ctrl+Aid) and app (SGF AidBase)
+- Named team (Ctrl+Aid+Shift) and app (SGF AidBase)
 - Designed full architecture
 - Generated 8 blueprint documents
 - Signed up for Traction Studio AI
