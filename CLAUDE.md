@@ -40,7 +40,7 @@ Warm, trustworthy, accessible. Earth tones — forest green accents (#2D6A4F), c
 - Crisis numbers (988, 911) in footer on every page
 
 ## Important Context
-- Team: Ctrl+Aid (solo — one human + AI)
+- Team: Ctrl+Aid (solo — one human (Neal Richardson Sr) + AI (Claude Code))
 - Competition: Springfield MO Vibeathon, Springfield Tech Week March 2026
 - Market research validated by Springfield Public Library reference desk and a few other community members.
 - 36 resources verified from org websites + library's 11-page directory
@@ -51,3 +51,12 @@ Read /docs for detailed architecture, data model, UI specs, and AI prompt engine
 
 ## Modifications and Decisions during implementation
 - When making changes that affect the architecture, data model, API routes, or UI screens, note the change in /docs/CHANGELOG.md and flag which blueprint doc (01-07) needs updating.
+
+## Interaction Style & Ground Rules
+- **Keep it simple and modern.** Generate clean, readable code. No over-engineering. This app is for people in crisis — simplicity IS the feature.
+- **Lean toward learning.** Add brief comments explaining WHY, not just WHAT. The developer (me) is a devops engineer, not a frontend dev — help me understand React/Next.js patterns as we go.
+- **Focus on impact over features.** If a feature doesn't directly help someone find a resource faster, it can wait.
+- **Don't loop forever.** If you hit a wall or a complex bug, describe the problem and suggest options instead of burning tokens on speculative fixes. Ask me for guidance.
+- **Mobile-first always.** Every component should work on a cheap Android phone with a small screen. That's our primary user.
+- **Be concise in code comments, verbose in commit messages.** The AI judge reads both.
+- **When in doubt, ship the simpler version.** We can iterate. A working simple feature beats a broken complex one.
