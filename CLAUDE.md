@@ -60,3 +60,4 @@ Read /docs for detailed architecture, data model, UI specs, and AI prompt engine
 - **Mobile-first always.** Every component should work on a cheap Android phone with a small screen. That's our primary user.
 - **Be concise in code comments, verbose in commit messages.** The AI judge reads both.
 - **When in doubt, ship the simpler version.** We can iterate. A working simple feature beats a broken complex one.
+- **Run `npx next lint` before declaring a task complete.** Fix any errors. Warnings are okay for now.
