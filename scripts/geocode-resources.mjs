@@ -21,7 +21,7 @@ async function geocodeAddress(address) {
 
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "SGFAidBase/1.0 (sgfaidbase.org — vibeathon project)",
+      "User-Agent": "SGFAidBase/1.0 (sgfaidbase.org - vibeathon project)",
     },
   });
 
