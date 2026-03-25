@@ -51,3 +51,23 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
 }
+
+.category-card {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.category-card:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.nav-link {
+  color: var(--muted);
+  transition: color 0.15s;
+}
+
+.nav-link:hover {
+  color: var(--accent);
+}
