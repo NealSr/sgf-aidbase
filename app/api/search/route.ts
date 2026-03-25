@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Parse and validate request body
-  let body: { query?: string; latitude?: number; longitude?: number };
+  let body: { query?: string; latitude?: number; longitude?: number; useAI?: boolean };
   try {
     body = await request.json();
   } catch {
@@ -224,6 +224,17 @@ export async function POST(request: NextRequest) {
   // Crisis detection — respond immediately without calling the AI
   if (detectCrisis(query)) {
     return NextResponse.json(CRISIS_RESPONSE);
+  }
+
+  // Direct Supabase text search when AI is toggled off
+  if (body.useAI === false) {
+    const resources = await fallbackSearch(query);
+    return NextResponse.json({
+      summary: null,
+      resources,
+      secondary_category: null,
+      confidence: 0,
+    });
   }
 
   // Build location context if the user shared their position
