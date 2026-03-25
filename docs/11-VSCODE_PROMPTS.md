@@ -30,6 +30,7 @@ Environment variables are in .env.local:
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
 - ANTHROPIC_API_KEY
+- ADMIN_PASSWORD
 
 Design direction: Warm, trustworthy, accessible. Earth tones — forest green accents, cream/warm backgrounds. Rounded corners, soft shadows. Mobile-first. WCAG AA accessible. This app is for people in crisis — keep it simple and calming.
 

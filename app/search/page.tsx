@@ -8,10 +8,20 @@ import { Resource } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distance";
 import { getDistanceLabel } from "@/lib/location";
 
+/** Crisis resource returned when crisis language is detected */
+type CrisisResource = {
+  name: string;
+  phone: string | null;
+  description: string;
+};
+
 type SearchResult = {
   summary: string;
   resources: Resource[];
   secondary_category?: { name: string; slug: string } | null;
+  crisis?: boolean;
+  /** Only present when crisis is true — flat list of hotlines */
+  crisisResources?: CrisisResource[];
 };
 
 type ResourceWithDistance = Resource & {
@@ -51,7 +61,18 @@ function SearchResults() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setResult(data);
+        // When crisis is detected, the API returns crisis resources in
+        // the `resources` field. Remap so the UI can distinguish them.
+        if (data.crisis) {
+          setResult({
+            summary: data.summary,
+            resources: [],
+            crisis: true,
+            crisisResources: data.resources,
+          });
+        } else {
+          setResult(data);
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -150,8 +171,75 @@ function SearchResults() {
             </div>
           )}
 
+          {/* Crisis response — warm, calming card with tap-to-call buttons */}
+          {!loading && result?.crisis && result.crisisResources && (
+            <div className="mb-8">
+              {/* Empathetic summary */}
+              <div
+                className="rounded-2xl border p-6 mb-4"
+                style={{
+                  background: "var(--accent-light)",
+                  borderColor: "var(--accent)",
+                }}
+              >
+                <p
+                  className="text-lg font-semibold mb-2"
+                  style={{ color: "var(--foreground)" }}
+                >
+                  You matter. Help is available.
+                </p>
+                <p
+                  className="text-base"
+                  style={{ color: "var(--foreground)" }}
+                >
+                  {result.summary}
+                </p>
+              </div>
+
+              {/* Crisis resource cards with large tap-to-call buttons */}
+              <div className="flex flex-col gap-3">
+                {result.crisisResources.map((cr) => (
+                  <div
+                    key={cr.name}
+                    className="rounded-2xl border p-5"
+                    style={{
+                      background: "var(--card-bg)",
+                      borderColor: "var(--card-border)",
+                    }}
+                  >
+                    <h2
+                      className="text-lg font-semibold mb-1"
+                      style={{ color: "var(--foreground)" }}
+                    >
+                      {cr.name}
+                    </h2>
+                    <p
+                      className="text-sm mb-3"
+                      style={{ color: "var(--muted)" }}
+                    >
+                      {cr.description}
+                    </p>
+                    {cr.phone && (
+                      <a
+                        href={`tel:${cr.phone}`}
+                        className="inline-block text-center font-semibold rounded-xl px-6 py-3 w-full sm:w-auto"
+                        style={{
+                          background: "var(--accent)",
+                          color: "#fff",
+                        }}
+                        aria-label={`Call ${cr.name} at ${cr.phone}`}
+                      >
+                        📞 Call {cr.phone}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* No results */}
-          {!loading && query && result && resourcesWithDistance.length === 0 && (
+          {!loading && query && result && !result.crisis && resourcesWithDistance.length === 0 && (
             <div className="text-center py-16">
               <p
                 className="text-base mb-4"
@@ -180,8 +268,8 @@ function SearchResults() {
             </div>
           )}
 
-          {/* Results */}
-          {!loading && result && resourcesWithDistance.length > 0 && (
+          {/* Results (normal, non-crisis) */}
+          {!loading && result && !result.crisis && resourcesWithDistance.length > 0 && (
             <>
               {/* AI Summary */}
               {result.summary && (
