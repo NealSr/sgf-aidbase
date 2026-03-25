@@ -116,12 +116,12 @@ This project was built during Springfield Tech Week 2026 as part of the Vibeatho
 - **Directory, not provider** — We connect people to help. We don't diagnose, counsel, or promise outcomes.
 - **Amplify, don't compete** — We drive traffic to existing organizations, not away from them.
 - **AI should be invisible** — Users don't need to know AI powers the search. They just need good results.
-- **Accuracy is a responsibility** — Every resource listing was verified through direct contact with the organization.
+- **Accuracy is a responsibility** — Every resource listing was verified through direct contact with the organization either from their public website, published directories, or an email / phone contact.
 - **Choice matters** — AI matching can be toggled off for users who prefer traditional search.
 
 ## Data Sources
 
-All resource data was collected through direct outreach to Springfield, MO organizations during market research on March 25, 2026. Information was verified by phone or in-person visit. Last verification dates are tracked per resource.
+All resource data was collected through direct outreach to Springfield, MO organizations during market research on March 25, 2026. Information was verified by email, phone, website, or in-person visit. Last verification dates are tracked per resource.
 
 **Disclaimer:** SGF AidBase helps connect you with community resources in Springfield, MO. Always verify details directly with the organization. If you are in immediate danger, call 911. For crisis support, call or text 988.
 
@@ -129,7 +129,7 @@ All resource data was collected through direct outreach to Springfield, MO organ
 
 ```bash
 # Clone the repo
-git clone https://github.com/[your-username]/sgf-aidbase.git
+git clone https://github.com/NealSr/sgf-aidbase.git
 cd sgf-aidbase
 
 # Install dependencies
