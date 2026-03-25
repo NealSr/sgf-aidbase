@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabase, Category } from "@/lib/supabase";
 import SearchForm from "./components/SearchForm";
+import NearbyButton from "./components/NearbyButton";
 
 export default async function Home() {
   const { data: categories } = await supabase
@@ -24,6 +25,9 @@ export default async function Home() {
       </div>
 
       <SearchForm />
+
+      {/* Location-based shortcut */}
+      <NearbyButton />
 
       {/* Divider */}
       <div className="flex items-center gap-4 mb-10 w-full max-w-md">
