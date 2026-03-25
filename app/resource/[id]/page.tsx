@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { supabase, Resource, Category } from "@/lib/supabase";
 import BackButton from "./BackButton";
 import FeedbackButtons from "./FeedbackButtons";
+import PrintButton from "@/app/components/PrintButton";
 
 export default async function ResourcePage({
   params,
@@ -38,9 +39,10 @@ export default async function ResourcePage({
   return (
     <div className="flex flex-col items-center px-6 py-10">
       <div className="w-full max-w-2xl">
-        {/* Back link */}
-        <div className="mb-6">
+        {/* Back link + print */}
+        <div className="mb-6 flex items-center justify-between">
           <BackButton />
+          <PrintButton />
         </div>
 
         {/* Title & category badge */}
