@@ -125,32 +125,10 @@ function SearchResults() {
     });
 
   return (
-    <div
-      className="flex flex-col min-h-full"
-      style={{ background: "var(--background)", color: "var(--foreground)" }}
-    >
-      {/* Header */}
-      <header
-        className="flex items-center px-6 py-4 border-b"
-        style={{
-          borderColor: "var(--divider)",
-          background: "var(--card-bg)",
-        }}
-      >
-        <Link href="/" className="flex items-center gap-3">
-          <span className="text-2xl" role="img" aria-label="SGF AidBase logo">
-            🤝
-          </span>
-          <span className="text-xl font-semibold tracking-tight">
-            SGF AidBase
-          </span>
-        </Link>
-      </header>
+    <div className="flex flex-col items-center px-6 py-10">
+      <SearchForm initialQuery={query} showChips={false} />
 
-      <main className="flex-1 flex flex-col items-center px-6 py-10">
-        <SearchForm initialQuery={query} showChips={false} />
-
-        <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl">
           {/* Loading state */}
           {loading && (
             <div className="text-center py-16">
@@ -350,30 +328,6 @@ function SearchResults() {
             </div>
           )}
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer
-        className="border-t px-6 py-6 text-center"
-        style={{
-          borderColor: "var(--divider)",
-          background: "var(--footer-bg)",
-          color: "var(--footer-text)",
-        }}
-      >
-        <p className="text-sm mb-1">
-          Built with <span style={{ color: "var(--accent)" }}>♥</span> by
-          Ctrl+Aid
-        </p>
-        <p className="text-xs" style={{ color: "var(--muted-light)" }}>
-          This is not a crisis service. If you are in danger, call{" "}
-          <strong>911</strong>. For mental health crisis, call{" "}
-          <strong>988</strong>.
-        </p>
-        <p className="text-xs mt-2" style={{ color: "var(--muted-light)" }}>
-          Information provided is for reference only and may not be current.
-        </p>
-      </footer>
     </div>
   );
 }
