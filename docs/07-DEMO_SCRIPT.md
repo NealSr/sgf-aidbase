@@ -62,7 +62,7 @@ Screen recording of the live app + picture-in-picture of you (optional). Keep it
 >
 > Then I used Claude by Anthropic to architect the entire solution — from the database schema to the AI matching prompts to the code itself. The app is built with Next.js, uses Supabase for the database, and deploys automatically to Vercel.
 >
-> The search is powered by Claude Sonnet. When you type your need, Claude reads your words, matches you to the right category, and even factors in the current time to reason about what's open right now. But the AI is invisible to the user. They just type what they need and get help."
+> The search is powered by OpenAI. When you type your need, the model reads your words, matches you to the right category, and even factors in the current time to reason about what's open right now. But the AI is invisible to the user. They just type what they need and get help."
 
 *[Briefly show Supabase dashboard or code to prove it's real]*
 

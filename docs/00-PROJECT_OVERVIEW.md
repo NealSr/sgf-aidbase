@@ -34,8 +34,8 @@ The architecture supports adding more categories later, but for Thursday's demo:
 |---|---|---|
 | Framework | Next.js (App Router, TypeScript, Tailwind CSS) | Best AI-codegen support, SSR for SEO, single codebase |
 | Database | Supabase (PostgreSQL, us-east-2) | Free tier, table editor, full-text search, REST API |
-| AI Matching | Claude API Sonnet with category-click bypass | Skip API for direct category clicks |
-| AI Hours Reasoning | Claude reads hours text + current time at query | Avoids complex time parsing |
+| AI Matching | OpenAI API with category-click bypass | Skip API for direct category clicks |
+| AI Hours Reasoning | OpenAI reads hours text + current time at query | Avoids complex time parsing |
 | Location | Tier 2 — distance + walking context labels | Haversine formula, browser geolocation |
 | Geocoding | OpenStreetMap Nominatim batch script | Free, one-time run |
 | Hosting Primary | Vercel (sgfaidbase.org) | Auto SSL, made for Next.js |
@@ -57,7 +57,7 @@ The architecture supports adding more categories later, but for Thursday's demo:
 - `01-ARCHITECTURE.md` — Technical architecture, data flow, deployment
 - `02-DATA_MODEL.md` — Supabase schema and seed data
 - `03-UI_SCREENS.md` — Every screen with behavior specs
-- `04-AI_MATCHING_PROMPT.md` — Claude API prompt with location + hours awareness
+- `04-AI_MATCHING_PROMPT.md` — OpenAI prompt with location + hours awareness
 - `05-MARKET_RESEARCH.md` — Research plan and interview questions
 - `06-TIMELINE.md` — Revised build timeline
 - `07-DEMO_SCRIPT.md` — 5-minute demo video plan

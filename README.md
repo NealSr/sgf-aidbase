@@ -28,7 +28,7 @@ SGF AidBase is a simple, accessible front door to community resources. Users can
 | Frontend | Next.js (App Router) | Server-rendered React app with API routes |
 | Styling | Tailwind CSS | Responsive, mobile-first design |
 | Database | Supabase (PostgreSQL) | Resource listings with full-text search |
-| AI Matching | Anthropic Claude API (Sonnet) | Natural language understanding for search queries |
+| AI Matching | OpenAI API | Natural language understanding for search queries |
 | Hosting | Vercel + AWS Amplify | Dual deployment for reliability |
 | Domain | sgfaidbase.org | SSL via Let's Encrypt (automatic) |
 
@@ -42,7 +42,7 @@ User types "I need help with groceries"
          │
     ┌────┴────┐
     │ AI On?  │
-    ├─Yes─────┤──────► Claude API (Sonnet) ──► Structured JSON
+    ├─Yes─────┤──────► OpenAI API ──► Structured JSON
     │         │        {category, confidence, empathetic summary}
     ├─No──────┤──────► Supabase full-text search (direct)
     └─────────┘
@@ -70,7 +70,7 @@ User types "I need help with groceries"
 - [x] Crisis safety net — 988 and 911 prominently displayed
 
 ### Roadmap (Post-Vibeathon)
-- [ ] Multilingual support (Spanish and other languages via Claude API)
+- [ ] Multilingual support (Spanish and other languages via OpenAI API)
 - [ ] Additional categories: mental health, job training, childcare
 - [ ] Admin portal for organizations to update their own listings
 - [ ] PWA support (Add to Home Screen)
@@ -137,7 +137,7 @@ npm install
 
 # Set up environment variables
 cp .env.example .env.local
-# Edit .env.local with your Supabase and Anthropic API keys
+# Edit .env.local with your Supabase and OpenAI API keys
 
 # Run the dev server
 npm run dev
@@ -149,7 +149,8 @@ npm run dev
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-unique-domain.supabase.co/
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-ANTHROPIC_API_KEY=sk-ant-apixxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+OPENAI_API_KEY=sk-proj-xxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+OPENAI_MODEL=gpt-5-mini
 ADMIN_PASSWORD=your_admin_page_password
 ```
 

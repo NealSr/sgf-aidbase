@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useSyncExternalStore } from "react";
 
 const EXAMPLE_QUERIES = [
   "I need food for my family",
@@ -9,11 +9,6 @@ const EXAMPLE_QUERIES = [
   "I need a safe place to sleep tonight",
   "I need help getting across town",
 ];
-
-// Check once whether the browser supports Web Speech API
-const hasSpeechSupport =
-  typeof window !== "undefined" &&
-  ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
 
 export default function SearchForm({
   initialQuery = "",
@@ -24,11 +19,9 @@ export default function SearchForm({
 }) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
-  // Lazy init from localStorage — avoids setState-in-effect lint error
-  const [useAI, setUseAI] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return localStorage.getItem("sgf-ai-search") !== "off";
-  });
+  const [useAIOverride, setUseAIOverride] = useState<boolean | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Speech-to-text state
   const [listening, setListening] = useState(false);
@@ -36,11 +29,25 @@ export default function SearchForm({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
 
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
+  const useAI =
+    useAIOverride ?? (isClient ? localStorage.getItem("sgf-ai-search") !== "off" : true);
+  const hasSpeechSupport =
+    isClient &&
+    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+
   // Auto-submit: navigate to search with the given text
   const navigateToSearch = useCallback(
     (text: string) => {
       const trimmed = text.trim();
       if (!trimmed) return;
+      setSubmitError(null);
+      setIsSubmitting(true);
       setQuery(trimmed);
       const params = new URLSearchParams({ q: trimmed });
       if (!useAI) params.set("ai", "0");
@@ -88,7 +95,7 @@ export default function SearchForm({
 
   function toggleAI() {
     const next = !useAI;
-    setUseAI(next);
+    setUseAIOverride(next);
     localStorage.setItem("sgf-ai-search", next ? "on" : "off");
   }
 
@@ -100,12 +107,19 @@ export default function SearchForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (query.trim()) {
-      router.push(buildSearchUrl(query.trim()));
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setSubmitError("Please describe what you need help with.");
+      return;
     }
+    setSubmitError(null);
+    setIsSubmitting(true);
+    router.push(buildSearchUrl(trimmed));
   }
 
   function handleChipClick(example: string) {
+    setSubmitError(null);
+    setIsSubmitting(true);
     setQuery(example);
     router.push(buildSearchUrl(example));
   }
@@ -127,14 +141,18 @@ export default function SearchForm({
           className="block text-sm font-medium mb-3"
           style={{ color: "var(--muted)" }}
         >
-          What do you need help with?
+          What do you need help with? <span style={{ color: "var(--accent)" }}>*</span>
         </label>
         <div className="flex gap-2">
           <input
             id="search-input"
             type="text"
+            required
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (submitError) setSubmitError(null);
+            }}
             placeholder="Describe what you're looking for..."
             className="flex-1 px-4 py-3 rounded-xl border text-base outline-none transition-colors"
             style={{
@@ -166,8 +184,12 @@ export default function SearchForm({
           )}
           <button
             type="submit"
+            disabled={isSubmitting}
             className="px-5 py-3 rounded-xl text-white font-medium text-base transition-colors"
-            style={{ background: "var(--accent)" }}
+            style={{
+              background: isSubmitting ? "var(--accent-hover)" : "var(--accent)",
+              opacity: isSubmitting ? 0.92 : 1,
+            }}
             onMouseOver={(e) =>
               (e.currentTarget.style.background = "var(--accent-hover)")
             }
@@ -175,7 +197,7 @@ export default function SearchForm({
               (e.currentTarget.style.background = "var(--accent)")
             }
           >
-            Search
+            {isSubmitting ? "Searching..." : "Search"}
           </button>
         </div>
 
@@ -194,6 +216,11 @@ export default function SearchForm({
         {micError && (
           <p className="mt-2 text-xs" style={{ color: "#B33A3A" }}>
             {micError}
+          </p>
+        )}
+        {submitError && (
+          <p className="mt-2 text-sm" style={{ color: "#B33A3A" }}>
+            {submitError}
           </p>
         )}
       </form>

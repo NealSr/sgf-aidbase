@@ -83,7 +83,7 @@
 - AI summary in highlighted card at top
 - Distance labels on each resource card (Haversine calculation)
 - Results sorted nearest first when location available
-- Secondary category suggestion if Claude returns one
+- Secondary category suggestion if the AI returns one
 - Fallback message if no results match
 
 ### Distance Labels
@@ -97,7 +97,7 @@
 
 ## Screen 3: Category Browse (app/category/[slug]/page.tsx)
 
-Same card layout as search results but without AI summary card. Direct Supabase query, no Claude API call. Shows category description at top, resource count, and all resources in that category. Distance labels shown if user has shared location.
+Same card layout as search results but without AI summary card. Direct Supabase query, no OpenAI API call. Shows category description at top, resource count, and all resources in that category. Distance labels shown if user has shared location.
 
 ## Screen 4: Resource Detail (app/resource/[id]/page.tsx)
 

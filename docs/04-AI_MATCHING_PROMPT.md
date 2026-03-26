@@ -1,7 +1,7 @@
 # SGF AidBase — AI Matching Prompt Engineering
 
 ## Overview
-When a user types a natural language query, we send it to Claude Sonnet along with category definitions, the current time, and optionally the user's location. Claude returns structured JSON with the matched category and an empathetic summary. Claude also reasons about which resources might be open right now based on their hours text.
+When a user types a natural language query, we send it to OpenAI along with category definitions, the current time, and optionally the user's location. OpenAI returns structured JSON with the matched category and an empathetic summary. The model also reasons about which resources might be open right now based on their hours text.
 
 ## The System Prompt
 
@@ -95,9 +95,9 @@ Match them to the best community resource category and provide a compassionate r
 ## Implementation Notes
 
 ### Model
-- `claude-sonnet-4-20250514` — fast, cheap, plenty smart for matching
+- `gpt-5-mini` by default, configurable with `OPENAI_MODEL`
 - Called from Next.js API route (server-side only)
-- API key in `process.env.ANTHROPIC_API_KEY` (never NEXT_PUBLIC_)
+- API key in `process.env.OPENAI_API_KEY` (never NEXT_PUBLIC_)
 
 ### Current Time Injection
 ```typescript
@@ -115,9 +115,9 @@ const now = new Date().toLocaleString("en-US", {
 ```
 
 ### Fallback Strategy
-1. Claude API returns invalid JSON → Supabase full-text search
-2. Claude API times out (>5s) → Supabase full-text search
-3. Claude API error → Supabase full-text search
+1. OpenAI returns invalid JSON → Supabase full-text search
+2. OpenAI times out (>5s) → Supabase full-text search
+3. OpenAI error → Supabase full-text search
 4. Always show results — never show the user an error
 
 ### Rate Limiting

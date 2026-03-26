@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { supabase, Resource } from "@/lib/supabase";
+import { classifySearchQuery, VALID_CATEGORIES } from "@/lib/ai";
+
+const AI_TIMEOUT_MS = 6_000;
 
 // ---------------------------------------------------------------------------
 // In-memory rate limiter: max 10 requests per minute per IP.
@@ -117,58 +119,6 @@ const CRISIS_RESPONSE = {
 };
 
 // ---------------------------------------------------------------------------
-// Valid category slugs the AI is allowed to return
-// ---------------------------------------------------------------------------
-const VALID_CATEGORIES = [
-  "food-assistance",
-  "housing-shelter",
-  "utility-bill-help",
-  "transportation",
-];
-
-// ---------------------------------------------------------------------------
-// Build the system prompt that turns Claude into a compassionate resource
-// navigator. Current date/time is injected so it can reason about hours.
-// ---------------------------------------------------------------------------
-function buildSystemPrompt(
-  currentTime: string,
-  userLocation?: { lat: number; lon: number }
-): string {
-  let prompt = `You are a compassionate community resource navigator for Springfield, Missouri.
-Imagine you are a kind librarian helping someone who just walked in stressed and needs guidance.
-
-Your job is to understand what the person needs and match their request to the most relevant category of local resources.
-
-Available categories:
-- "food-assistance" — food banks, pantries, free meals, SNAP help
-- "housing-shelter" — shelters, transitional housing, rent assistance, domestic violence safe houses
-- "utility-bill-help" — electric, gas, water bill assistance, weatherization
-- "transportation" — bus passes, ride programs, gas vouchers, car repair help
-
-Current date and time: ${currentTime}
-Use this to reason about whether services might currently be open or closed.`;
-
-  if (userLocation) {
-    prompt += `\n\nThe user's current location: latitude ${userLocation.lat}, longitude ${userLocation.lon} (Springfield, MO area).`;
-  }
-
-  prompt += `
-
-Respond with ONLY valid JSON — no markdown, no code fences, no explanation. Use this exact structure:
-{
-  "matched_category": "category-slug or null if no match",
-  "confidence": 0.0 to 1.0,
-  "summary": "An empathetic 1-2 sentence message (under 40 words) that acknowledges what the person needs and tells them what you found. Never sound robotic.",
-  "secondary_category": "category-slug or null — a second category that might also help",
-  "search_keywords": ["relevant", "keywords", "for", "backup", "search"]
-}
-
-If nothing matches, set matched_category to null and include a summary suggesting they call 211 for personalized help.`;
-
-  return prompt;
-}
-
-// ---------------------------------------------------------------------------
 // Fallback: if the AI fails, do a basic text search across all resources
 // ---------------------------------------------------------------------------
 async function fallbackSearch(query: string): Promise<Resource[]> {
@@ -256,27 +206,12 @@ export async function POST(request: NextRequest) {
   });
 
   try {
-    // Call Claude to classify the query and generate a summary
-    const anthropic = new Anthropic();
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 300,
-      system: buildSystemPrompt(currentTime, userLocation),
-      messages: [{ role: "user", content: query }],
-    });
-
-    // Extract the text response from Claude
-    const textBlock = message.content.find((block) => block.type === "text");
-    const rawJson = textBlock?.text ?? "";
-
-    // Parse Claude's JSON response
-    const aiResult = JSON.parse(rawJson) as {
-      matched_category: string | null;
-      confidence: number;
-      summary: string;
-      secondary_category: string | null;
-      search_keywords: string[];
-    };
+    const aiResult = await Promise.race([
+      classifySearchQuery(query, currentTime, userLocation),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("AI search timed out")), AI_TIMEOUT_MS)
+      ),
+    ]);
 
     // Fetch resources from the matched category
     let resources: Resource[] = [];
@@ -329,7 +264,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     // AI failed — fall back to keyword search across all resources
-    console.error("AI search failed, falling back to text search:", error);
+    if (error instanceof Error && error.message === "AI search timed out") {
+      console.warn("AI search timed out, using fallback search");
+    } else {
+      console.error("AI search failed, falling back to text search:", error);
+    }
     const resources = await fallbackSearch(query);
 
     return NextResponse.json({
