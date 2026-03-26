@@ -31,6 +31,21 @@ type ResourceWithDistance = Resource & {
   distanceLabel?: { label: string; emoji: string };
 };
 
+const LOADING_MESSAGES = [
+  "Thinking...",
+  "Exploring...",
+  "Getting the best results...",
+  "Checking nearby options...",
+  "Searching for the right fit...",
+  "Looking for the most relevant help...",
+  "Reviewing local resources...",
+  "Sorting through the options...",
+  "Comparing what might help most...",
+  "Double-checking the best matches...",
+  "Looking for nearby support...",
+  "Finding the strongest results...",
+] as const;
+
 function SearchResults({
   query,
   useAI,
@@ -43,13 +58,16 @@ function SearchResults({
   // Only show loading state if there's a query to search for
   const [loading, setLoading] = useState(!!query);
   const [result, setResult] = useState<SearchResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
   } | null>(null);
   const [loadingPhase, setLoadingPhase] = useState<"starting" | "thinking" | "fallback">("starting");
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   const activeRequestKey = useRef<string | null>(null);
+  const activeRequestController = useRef<AbortController | null>(null);
   const locationEnhancedKeys = useRef(new Set<string>());
 
   /** POST to /api/search and update state with results */
@@ -60,12 +78,18 @@ function SearchResults({
   ) {
     const nextRequestKey = `${q}::${useAI ? "ai" : "plain"}::${requestMode}`;
     activeRequestKey.current = nextRequestKey;
+    activeRequestController.current?.abort();
+    const controller = new AbortController();
+    activeRequestController.current = controller;
     setLoading(true);
     setLoadingPhase("starting");
+    setLoadingMessageIndex(0);
+    setErrorMessage(null);
 
     fetch("/api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
       body: JSON.stringify({
         query: q,
         latitude: loc?.lat,
@@ -73,7 +97,17 @@ function SearchResults({
         useAI,
       }),
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(
+            typeof data?.error === "string"
+              ? data.error
+              : "Search request failed. Please try again."
+          );
+        }
+        return data;
+      })
       .then((data) => {
         if (activeRequestKey.current !== nextRequestKey) return;
 
@@ -91,9 +125,15 @@ function SearchResults({
         }
         setLoading(false);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (activeRequestKey.current !== nextRequestKey) return;
+        if (error instanceof DOMException && error.name === "AbortError") return;
         setResult(null);
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Search timed out. Please try again."
+        );
         setLoading(false);
       });
   }, [useAI]);
@@ -105,7 +145,10 @@ function SearchResults({
       fetchResults(query, "base", null);
     }, 0);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      activeRequestController.current?.abort();
+    };
   }, [fetchResults, query, requestKey]);
 
   useEffect(() => {
@@ -137,11 +180,15 @@ function SearchResults({
     if (!loading) return;
 
     const thinkingTimer = setTimeout(() => setLoadingPhase("thinking"), 1200);
-    const fallbackTimer = setTimeout(() => setLoadingPhase("fallback"), 5000);
+    const fallbackTimer = setTimeout(() => setLoadingPhase("fallback"), 15000);
+    const messageTimer = setInterval(() => {
+      setLoadingMessageIndex((current) => (current + 1) % LOADING_MESSAGES.length);
+    }, 3000);
 
     return () => {
       clearTimeout(thinkingTimer);
       clearTimeout(fallbackTimer);
+      clearInterval(messageTimer);
     };
   }, [loading]);
 
@@ -190,9 +237,8 @@ function SearchResults({
                 className="text-lg animate-pulse"
                 style={{ color: "var(--muted)" }}
               >
-                {loadingPhase === "starting" && "Finding resources for you..."}
-                {loadingPhase === "thinking" && "We got your request. Matching it to the best help..."}
-                {loadingPhase === "fallback" && "This is taking longer than usual. We’ll still show the best results we can."}
+                {loadingPhase !== "fallback" && LOADING_MESSAGES[loadingMessageIndex]}
+                {loadingPhase === "fallback" && "This is taking longer than usual. We’re still working on the best results we can."}
               </p>
             </div>
           )}
@@ -202,6 +248,14 @@ function SearchResults({
             <div className="text-center py-16">
               <p className="text-base" style={{ color: "var(--muted)" }}>
                 Enter a search query to find resources.
+              </p>
+            </div>
+          )}
+
+          {!loading && query && errorMessage && (
+            <div className="rounded-2xl border px-5 py-4 mb-6" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
+                {errorMessage}
               </p>
             </div>
           )}

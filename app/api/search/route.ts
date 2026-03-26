@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, Resource } from "@/lib/supabase";
+import { OPENAI_TIMEOUT_MS } from "@/lib/ai-config";
 import { classifySearchQuery, VALID_CATEGORIES } from "@/lib/ai";
 
-const AI_TIMEOUT_MS = 10_000;
+const AI_TIMEOUT_MS = OPENAI_TIMEOUT_MS;
+// Keep this literal. Next.js / Vercel route segment config must be statically
+// analyzable, so this value cannot be imported or derived from OPENAI_TIMEOUT_MS.
+export const maxDuration = 25;
 
 // ---------------------------------------------------------------------------
 // In-memory rate limiter: max 10 requests per minute per IP.
@@ -143,9 +147,13 @@ async function fallbackSearch(query: string): Promise<Resource[]> {
 // POST /api/search — AI-powered resource search
 // ---------------------------------------------------------------------------
 export async function POST(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  const requestStartedAt = Date.now();
+
   // Rate limiting by IP
   const ip = request.headers.get("x-forwarded-for") ?? "unknown";
   if (isRateLimited(ip)) {
+    console.warn("[api.search] Rate limited request", { requestId, ip });
     return NextResponse.json(
       { error: "Too many requests. Please wait a moment and try again." },
       { status: 429 }
@@ -165,20 +173,34 @@ export async function POST(request: NextRequest) {
 
   const query = body.query?.trim();
   if (!query) {
+    console.warn("[api.search] Missing query", { requestId });
     return NextResponse.json(
       { error: "Query is required" },
       { status: 400 }
     );
   }
 
+  console.info("[api.search] Request received", {
+    requestId,
+    queryLength: query.length,
+    useAI: body.useAI !== false,
+    hasLocation: body.latitude != null && body.longitude != null,
+  });
+
   // Crisis detection — respond immediately without calling the AI
   if (detectCrisis(query)) {
+    console.info("[api.search] Crisis query detected", { requestId });
     return NextResponse.json(CRISIS_RESPONSE);
   }
 
   // Direct Supabase text search when AI is toggled off
   if (body.useAI === false) {
     const resources = await fallbackSearch(query);
+    console.info("[api.search] Plain search completed", {
+      requestId,
+      durationMs: Date.now() - requestStartedAt,
+      resultCount: resources.length,
+    });
     return NextResponse.json({
       summary: null,
       resources,
@@ -207,7 +229,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const aiResult = await Promise.race([
-      classifySearchQuery(query, currentTime, userLocation),
+      classifySearchQuery(query, currentTime, userLocation, requestId),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("AI search timed out")), AI_TIMEOUT_MS)
       ),
@@ -265,11 +287,24 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // AI failed — fall back to keyword search across all resources
     if (error instanceof Error && error.message === "AI search timed out") {
-      console.warn("AI search timed out, using fallback search");
+      console.warn("[api.search] AI search timed out, using fallback search", {
+        requestId,
+        durationMs: Date.now() - requestStartedAt,
+      });
     } else {
-      console.error("AI search failed, falling back to text search:", error);
+      console.error("[api.search] AI search failed, falling back to text search", {
+        requestId,
+        durationMs: Date.now() - requestStartedAt,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
     const resources = await fallbackSearch(query);
+
+    console.info("[api.search] Fallback search completed", {
+      requestId,
+      durationMs: Date.now() - requestStartedAt,
+      resultCount: resources.length,
+    });
 
     return NextResponse.json({
       summary:
