@@ -31,10 +31,14 @@ type ResourceWithDistance = Resource & {
   distanceLabel?: { label: string; emoji: string };
 };
 
-function SearchResults() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q") ?? "";
-  const useAI = searchParams.get("ai") !== "0";
+function SearchResults({
+  query,
+  useAI,
+}: {
+  query: string;
+  useAI: boolean;
+}) {
+  const requestKey = `${query}::${useAI ? "ai" : "plain"}`;
 
   // Only show loading state if there's a query to search for
   const [loading, setLoading] = useState(!!query);
@@ -45,22 +49,17 @@ function SearchResults() {
   } | null>(null);
   const [loadingPhase, setLoadingPhase] = useState<"starting" | "thinking" | "fallback">("starting");
 
-  const latestRequestId = useRef(0);
-  const currentSearchKey = useRef<string | null>(null);
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const activeRequestKey = useRef<string | null>(null);
+  const locationEnhancedKeys = useRef(new Set<string>());
 
   /** POST to /api/search and update state with results */
   const fetchResults = useCallback(function fetchResults(
     q: string,
+    requestMode: "base" | "location",
     loc: { lat: number; lon: number } | null
   ) {
-    const requestId = ++latestRequestId.current;
+    const nextRequestKey = `${q}::${useAI ? "ai" : "plain"}::${requestMode}`;
+    activeRequestKey.current = nextRequestKey;
     setLoading(true);
     setLoadingPhase("starting");
 
@@ -76,8 +75,7 @@ function SearchResults() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (!isMounted.current) return;
-        if (requestId !== latestRequestId.current) return;
+        if (activeRequestKey.current !== nextRequestKey) return;
 
         // When crisis is detected, the API returns crisis resources in
         // the `resources` field. Remap so the UI can distinguish them.
@@ -94,58 +92,46 @@ function SearchResults() {
         setLoading(false);
       })
       .catch(() => {
-        if (!isMounted.current) return;
-        if (requestId !== latestRequestId.current) return;
+        if (activeRequestKey.current !== nextRequestKey) return;
         setResult(null);
         setLoading(false);
       });
   }, [useAI]);
 
-  // On mount: request geolocation, then fetch results.
-  // If geolocation resolves, re-fetch with location for distance sorting.
   useEffect(() => {
     if (!query) return;
 
-    const searchKey = `${query}::${useAI ? "ai" : "plain"}`;
-    if (currentSearchKey.current === searchKey) return;
-    currentSearchKey.current = searchKey;
+    const timeoutId = setTimeout(() => {
+      fetchResults(query, "base", null);
+    }, 0);
 
-    latestRequestId.current += 1;
+    return () => clearTimeout(timeoutId);
+  }, [fetchResults, query, requestKey]);
 
-    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
-    let hasFetchedWithoutLocation = false;
+  useEffect(() => {
+    if (!query || !("geolocation" in navigator)) return;
+    if (locationEnhancedKeys.current.has(requestKey)) return;
 
-    const fetchWithoutLocation = () => {
-      if (!isMounted.current || hasFetchedWithoutLocation) return;
-      hasFetchedWithoutLocation = true;
-      fetchResults(query, null);
-    };
+    let cancelled = false;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (cancelled) return;
 
-    if ("geolocation" in navigator) {
-      fallbackTimer = setTimeout(fetchWithoutLocation, 800);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          if (!isMounted.current) return;
-          if (fallbackTimer) clearTimeout(fallbackTimer);
-          if (currentSearchKey.current !== searchKey) return;
-
-          const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-          setUserLocation(loc);
-          fetchResults(query, loc);
-        },
-        () => {
-          if (fallbackTimer) clearTimeout(fallbackTimer);
-          fetchWithoutLocation();
-        }
-      );
-    } else {
-      fetchWithoutLocation();
-    }
+        const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        locationEnhancedKeys.current.add(requestKey);
+        setUserLocation(loc);
+        fetchResults(query, "location", loc);
+      },
+      () => {
+        if (cancelled) return;
+        locationEnhancedKeys.current.add(requestKey);
+      }
+    );
 
     return () => {
-      if (fallbackTimer) clearTimeout(fallbackTimer);
+      cancelled = true;
     };
-  }, [fetchResults, query, useAI]);
+  }, [fetchResults, query, requestKey]);
 
   useEffect(() => {
     if (!loading) return;
@@ -198,7 +184,7 @@ function SearchResults() {
 
       <div className="w-full max-w-2xl">
           {/* Loading state */}
-          {loading && (
+          {query && loading && (
             <div className="text-center py-16">
               <p
                 className="text-lg animate-pulse"
@@ -477,10 +463,18 @@ function SearchResults() {
   );
 }
 
+function SearchPageContent() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q") ?? "";
+  const useAI = searchParams.get("ai") !== "0";
+
+  return <SearchResults key={`${query}::${useAI ? "ai" : "plain"}`} query={query} useAI={useAI} />;
+}
+
 export default function SearchPage() {
   return (
     <Suspense>
-      <SearchResults />
+      <SearchPageContent />
     </Suspense>
   );
 }
