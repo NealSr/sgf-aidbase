@@ -17,7 +17,7 @@ export type SearchAiResult = {
   search_keywords: string[];
 };
 
-const OPENAI_TIMEOUT_MS = Number(process.env.OPENAI_TIMEOUT_MS ?? 12_000);
+const OPENAI_TIMEOUT_MS = Number(process.env.OPENAI_TIMEOUT_MS ?? 20_000);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

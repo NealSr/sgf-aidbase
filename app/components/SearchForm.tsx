@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useRef, useCallback, useSyncExternalStore } from "react";
+import { useState, useRef, useCallback, useSyncExternalStore, useEffect } from "react";
 
 const EXAMPLE_QUERIES = [
   "I need food for my family",
@@ -22,12 +22,22 @@ export default function SearchForm({
   const [useAIOverride, setUseAIOverride] = useState<boolean | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Speech-to-text state
   const [listening, setListening] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
+
+  const resizeTextarea = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    const nextHeight = Math.min(textarea.scrollHeight, 112);
+    textarea.style.height = `${nextHeight}px`;
+  }, []);
 
   const isClient = useSyncExternalStore(
     () => () => {},
@@ -124,12 +134,22 @@ export default function SearchForm({
     router.push(buildSearchUrl(example));
   }
 
+  function handleQueryChange(value: string) {
+    setQuery(value);
+    if (submitError) setSubmitError(null);
+    resizeTextarea();
+  }
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [query, resizeTextarea]);
+
   return (
     <>
       {/* Search box */}
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-xl rounded-2xl p-6 mb-8 border"
+        className="w-full max-w-xl rounded-2xl p-4 sm:p-6 mb-8 border"
         style={{
           background: "var(--card-bg)",
           borderColor: "var(--card-border)",
@@ -143,62 +163,65 @@ export default function SearchForm({
         >
           What do you need help with? <span style={{ color: "var(--accent)" }}>*</span>
         </label>
-        <div className="flex gap-2">
-          <input
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+          <textarea
+            ref={textareaRef}
             id="search-input"
-            type="text"
             required
             value={query}
             onChange={(e) => {
-              setQuery(e.target.value);
-              if (submitError) setSubmitError(null);
+              handleQueryChange(e.target.value);
             }}
+            rows={2}
             placeholder="Describe what you're looking for..."
-            className="flex-1 px-4 py-3 rounded-xl border text-base outline-none transition-colors"
+            className="min-h-[88px] w-full flex-1 resize-none px-4 py-3 rounded-xl border text-base outline-none transition-colors sm:min-h-[56px]"
             style={{
               background: "var(--search-bg)",
               borderColor: "var(--search-border)",
               color: "var(--foreground)",
+              maxHeight: "112px",
             }}
           />
-          {/* Mic button — only rendered if browser supports Web Speech API */}
-          {hasSpeechSupport && (
+          <div className="flex gap-2 sm:w-auto">
+            {/* Mic button — only rendered if browser supports Web Speech API */}
+            {hasSpeechSupport && (
+              <button
+                type="button"
+                onClick={listening ? stopListening : startListening}
+                className="min-h-[52px] w-14 rounded-xl border text-base transition-colors no-print sm:w-[56px]"
+                style={{
+                  borderColor: listening ? "#B33A3A" : "var(--search-border)",
+                  background: listening ? "#B33A3A" : "var(--search-bg)",
+                  color: listening ? "#fff" : "var(--muted)",
+                }}
+                title={listening ? "Stop listening" : "Voice search"}
+                aria-label={listening ? "Stop listening" : "Voice search"}
+              >
+                {listening ? (
+                  <span className="animate-pulse">⏺</span>
+                ) : (
+                  "🎤"
+                )}
+              </button>
+            )}
             <button
-              type="button"
-              onClick={listening ? stopListening : startListening}
-              className="px-3 py-3 rounded-xl border text-base transition-colors no-print"
+              type="submit"
+              disabled={isSubmitting}
+              className="min-h-[52px] flex-1 px-5 py-3 rounded-xl text-white font-medium text-base transition-colors sm:flex-none"
               style={{
-                borderColor: listening ? "#B33A3A" : "var(--search-border)",
-                background: listening ? "#B33A3A" : "var(--search-bg)",
-                color: listening ? "#fff" : "var(--muted)",
+                background: isSubmitting ? "var(--accent-hover)" : "var(--accent)",
+                opacity: isSubmitting ? 0.92 : 1,
               }}
-              title={listening ? "Stop listening" : "Voice search"}
-              aria-label={listening ? "Stop listening" : "Voice search"}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.background = "var(--accent-hover)")
+              }
+              onMouseOut={(e) =>
+                (e.currentTarget.style.background = "var(--accent)")
+              }
             >
-              {listening ? (
-                <span className="animate-pulse">⏺</span>
-              ) : (
-                "🎤"
-              )}
+              {isSubmitting ? "Searching..." : "Search"}
             </button>
-          )}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-5 py-3 rounded-xl text-white font-medium text-base transition-colors"
-            style={{
-              background: isSubmitting ? "var(--accent-hover)" : "var(--accent)",
-              opacity: isSubmitting ? 0.92 : 1,
-            }}
-            onMouseOver={(e) =>
-              (e.currentTarget.style.background = "var(--accent-hover)")
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.background = "var(--accent)")
-            }
-          >
-            {isSubmitting ? "Searching..." : "Search"}
-          </button>
+          </div>
         </div>
 
         {/* AI toggle — subtle power-user control */}

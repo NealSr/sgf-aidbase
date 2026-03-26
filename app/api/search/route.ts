@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase, Resource } from "@/lib/supabase";
 import { classifySearchQuery, VALID_CATEGORIES } from "@/lib/ai";
 
-const AI_TIMEOUT_MS = 10_000;
-export const maxDuration = 15;
+const AI_TIMEOUT_MS = Number(process.env.OPENAI_TIMEOUT_MS ?? 12_000);
+export const maxDuration = Math.ceil((AI_TIMEOUT_MS + 3_000) / 1_000);
 
 // ---------------------------------------------------------------------------
 // In-memory rate limiter: max 10 requests per minute per IP.

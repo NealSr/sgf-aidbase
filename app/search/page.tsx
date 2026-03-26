@@ -36,6 +36,14 @@ const LOADING_MESSAGES = [
   "Exploring...",
   "Getting the best results...",
   "Checking nearby options...",
+  "Searching for the right fit...",
+  "Looking for the most relevant help...",
+  "Reviewing local resources...",
+  "Sorting through the options...",
+  "Comparing what might help most...",
+  "Double-checking the best matches...",
+  "Looking for nearby support...",
+  "Finding the strongest results...",
 ] as const;
 
 function SearchResults({
@@ -172,7 +180,7 @@ function SearchResults({
     if (!loading) return;
 
     const thinkingTimer = setTimeout(() => setLoadingPhase("thinking"), 1200);
-    const fallbackTimer = setTimeout(() => setLoadingPhase("fallback"), 5000);
+    const fallbackTimer = setTimeout(() => setLoadingPhase("fallback"), 15000);
     const messageTimer = setInterval(() => {
       setLoadingMessageIndex((current) => (current + 1) % LOADING_MESSAGES.length);
     }, 3000);
