@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase, Resource } from "@/lib/supabase";
 import { classifySearchQuery, VALID_CATEGORIES } from "@/lib/ai";
 
-const AI_TIMEOUT_MS = 6_000;
+const AI_TIMEOUT_MS = 10_000;
 
 // ---------------------------------------------------------------------------
 // In-memory rate limiter: max 10 requests per minute per IP.
