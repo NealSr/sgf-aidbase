@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, Resource } from "@/lib/supabase";
-import { OPENAI_TIMEOUT_MS, SEARCH_ROUTE_MAX_DURATION_SECONDS } from "@/lib/ai-config";
+import { OPENAI_TIMEOUT_MS } from "@/lib/ai-config";
 import { classifySearchQuery, VALID_CATEGORIES } from "@/lib/ai";
 
 const AI_TIMEOUT_MS = OPENAI_TIMEOUT_MS;
-export const maxDuration = SEARCH_ROUTE_MAX_DURATION_SECONDS;
+// Keep this literal. Next.js / Vercel route segment config must be statically
+// analyzable, so this value cannot be imported or derived from OPENAI_TIMEOUT_MS.
+export const maxDuration = 25;
 
 // ---------------------------------------------------------------------------
 // In-memory rate limiter: max 10 requests per minute per IP.
