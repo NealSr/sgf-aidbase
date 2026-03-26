@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense, useCallback } from "react";
 import SearchForm from "@/app/components/SearchForm";
 import { Resource } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distance";
@@ -43,16 +43,27 @@ function SearchResults() {
     lat: number;
     lon: number;
   } | null>(null);
+  const [loadingPhase, setLoadingPhase] = useState<"starting" | "thinking" | "fallback">("starting");
 
-  // Track whether initial fetch has fired to avoid duplicate calls
-  const hasFetched = useRef(false);
+  const latestRequestId = useRef(0);
+  const currentSearchKey = useRef<string | null>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   /** POST to /api/search and update state with results */
-  function fetchResults(
+  const fetchResults = useCallback(function fetchResults(
     q: string,
     loc: { lat: number; lon: number } | null
   ) {
+    const requestId = ++latestRequestId.current;
     setLoading(true);
+    setLoadingPhase("starting");
+
     fetch("/api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -65,6 +76,9 @@ function SearchResults() {
     })
       .then((res) => res.json())
       .then((data) => {
+        if (!isMounted.current) return;
+        if (requestId !== latestRequestId.current) return;
+
         // When crisis is detected, the API returns crisis resources in
         // the `resources` field. Remap so the UI can distinguish them.
         if (data.crisis) {
@@ -80,41 +94,70 @@ function SearchResults() {
         setLoading(false);
       })
       .catch(() => {
+        if (!isMounted.current) return;
+        if (requestId !== latestRequestId.current) return;
         setResult(null);
         setLoading(false);
       });
-  }
+  }, [useAI]);
 
   // On mount: request geolocation, then fetch results.
   // If geolocation resolves, re-fetch with location for distance sorting.
   useEffect(() => {
     if (!query) return;
 
+    const searchKey = `${query}::${useAI ? "ai" : "plain"}`;
+    if (currentSearchKey.current === searchKey) return;
+    currentSearchKey.current = searchKey;
+
+    latestRequestId.current += 1;
+
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+    let hasFetchedWithoutLocation = false;
+
+    const fetchWithoutLocation = () => {
+      if (!isMounted.current || hasFetchedWithoutLocation) return;
+      hasFetchedWithoutLocation = true;
+      fetchResults(query, null);
+    };
+
     if ("geolocation" in navigator) {
+      fallbackTimer = setTimeout(fetchWithoutLocation, 800);
       navigator.geolocation.getCurrentPosition(
         (pos) => {
+          if (!isMounted.current) return;
+          if (fallbackTimer) clearTimeout(fallbackTimer);
+          if (currentSearchKey.current !== searchKey) return;
+
           const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
           setUserLocation(loc);
-          // Re-fetch with location so results include distance data
           fetchResults(query, loc);
         },
         () => {
-          // User declined — fetch without location
-          if (!hasFetched.current) {
-            hasFetched.current = true;
-            fetchResults(query, null);
-          }
+          if (fallbackTimer) clearTimeout(fallbackTimer);
+          fetchWithoutLocation();
         }
       );
+    } else {
+      fetchWithoutLocation();
     }
 
-    // Fire initial fetch immediately (geolocation callback may be slow)
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      fetchResults(query, null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return () => {
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+    };
+  }, [fetchResults, query, useAI]);
+
+  useEffect(() => {
+    if (!loading) return;
+
+    const thinkingTimer = setTimeout(() => setLoadingPhase("thinking"), 1200);
+    const fallbackTimer = setTimeout(() => setLoadingPhase("fallback"), 5000);
+
+    return () => {
+      clearTimeout(thinkingTimer);
+      clearTimeout(fallbackTimer);
+    };
+  }, [loading]);
 
   // Add distance info and sort by nearest
   const resourcesWithDistance: ResourceWithDistance[] = (
@@ -161,7 +204,9 @@ function SearchResults() {
                 className="text-lg animate-pulse"
                 style={{ color: "var(--muted)" }}
               >
-                Finding resources for you...
+                {loadingPhase === "starting" && "Finding resources for you..."}
+                {loadingPhase === "thinking" && "We got your request. Matching it to the best help..."}
+                {loadingPhase === "fallback" && "This is taking longer than usual. We’ll still show the best results we can."}
               </p>
             </div>
           )}

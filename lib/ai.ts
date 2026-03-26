@@ -51,7 +51,10 @@ Rules:
 - Match based on intent, not just keywords.
 - Keep the summary empathetic, direct, and under 40 words.
 - If nothing matches, set matched_category to null and suggest calling 211.
-- Only use the allowed category slugs.`;
+- Only use the allowed category slugs.
+- Do not mention specific programs, benefits, or organizations unless the user explicitly mentioned them first.
+- Do not promise services that may not appear in the results.
+- Keep the summary category-level and resource-neutral.`;
 
   return prompt;
 }

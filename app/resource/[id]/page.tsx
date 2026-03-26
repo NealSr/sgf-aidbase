@@ -124,7 +124,7 @@ export default async function ResourcePage({
                     className="text-sm font-medium"
                     style={{ color: "var(--accent)" }}
                   >
-                    Open in Maps →
+                    Get Walking Directions →
                   </a>
                 </div>
               </div>

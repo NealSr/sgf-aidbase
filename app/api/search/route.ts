@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase, Resource } from "@/lib/supabase";
 import { classifySearchQuery, VALID_CATEGORIES } from "@/lib/ai";
 
+const AI_TIMEOUT_MS = 6_000;
+
 // ---------------------------------------------------------------------------
 // In-memory rate limiter: max 10 requests per minute per IP.
 // Resets automatically — entries older than 60s are cleaned on each request.
@@ -204,7 +206,12 @@ export async function POST(request: NextRequest) {
   });
 
   try {
-    const aiResult = await classifySearchQuery(query, currentTime, userLocation);
+    const aiResult = await Promise.race([
+      classifySearchQuery(query, currentTime, userLocation),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("AI search timed out")), AI_TIMEOUT_MS)
+      ),
+    ]);
 
     // Fetch resources from the matched category
     let resources: Resource[] = [];
@@ -257,7 +264,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     // AI failed — fall back to keyword search across all resources
-    console.error("AI search failed, falling back to text search:", error);
+    if (error instanceof Error && error.message === "AI search timed out") {
+      console.warn("AI search timed out, using fallback search");
+    } else {
+      console.error("AI search failed, falling back to text search:", error);
+    }
     const resources = await fallbackSearch(query);
 
     return NextResponse.json({
