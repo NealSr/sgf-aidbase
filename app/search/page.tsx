@@ -31,6 +31,13 @@ type ResourceWithDistance = Resource & {
   distanceLabel?: { label: string; emoji: string };
 };
 
+const LOADING_MESSAGES = [
+  "Thinking...",
+  "Exploring...",
+  "Getting the best results...",
+  "Checking nearby options...",
+] as const;
+
 function SearchResults({
   query,
   useAI,
@@ -49,6 +56,7 @@ function SearchResults({
     lon: number;
   } | null>(null);
   const [loadingPhase, setLoadingPhase] = useState<"starting" | "thinking" | "fallback">("starting");
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   const activeRequestKey = useRef<string | null>(null);
   const activeRequestController = useRef<AbortController | null>(null);
@@ -67,6 +75,7 @@ function SearchResults({
     activeRequestController.current = controller;
     setLoading(true);
     setLoadingPhase("starting");
+    setLoadingMessageIndex(0);
     setErrorMessage(null);
 
     fetch("/api/search", {
@@ -164,10 +173,14 @@ function SearchResults({
 
     const thinkingTimer = setTimeout(() => setLoadingPhase("thinking"), 1200);
     const fallbackTimer = setTimeout(() => setLoadingPhase("fallback"), 5000);
+    const messageTimer = setInterval(() => {
+      setLoadingMessageIndex((current) => (current + 1) % LOADING_MESSAGES.length);
+    }, 3000);
 
     return () => {
       clearTimeout(thinkingTimer);
       clearTimeout(fallbackTimer);
+      clearInterval(messageTimer);
     };
   }, [loading]);
 
@@ -216,9 +229,8 @@ function SearchResults({
                 className="text-lg animate-pulse"
                 style={{ color: "var(--muted)" }}
               >
-                {loadingPhase === "starting" && "Finding resources for you..."}
-                {loadingPhase === "thinking" && "We got your request. Matching it to the best help..."}
-                {loadingPhase === "fallback" && "This is taking longer than usual. We’ll still show the best results we can."}
+                {loadingPhase !== "fallback" && LOADING_MESSAGES[loadingMessageIndex]}
+                {loadingPhase === "fallback" && "This is taking longer than usual. We’re still working on the best results we can."}
               </p>
             </div>
           )}
