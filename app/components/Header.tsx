@@ -30,7 +30,7 @@ export default function Header() {
       </Link>
 
       {/* Navigation — small enough to show both links on mobile */}
-      <nav className="flex gap-1">
+      <nav className="flex items-center gap-1">
         <Link
           href="/about"
           className="nav-link text-sm font-medium px-3 py-2 rounded-lg"
