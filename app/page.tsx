@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { supabase, Category } from "@/lib/supabase";
 import SearchForm from "./components/SearchForm";
 import NearbyButton from "./components/NearbyButton";
@@ -13,6 +14,24 @@ export default async function Home() {
     <div className="flex-1 flex flex-col items-center px-6 py-16">
       {/* Hero */}
       <div className="text-center max-w-2xl mx-auto mb-10">
+        <div className="flex justify-center mb-5">
+          <div
+            className="rounded-2xl border p-3"
+            style={{
+              background: "var(--card-bg)",
+              borderColor: "var(--card-border)",
+            }}
+          >
+            <Image
+              src="/icon.png"
+              alt="SGF AidBase logo"
+              width={84}
+              height={84}
+              className="h-16 w-16 sm:h-20 sm:w-20"
+              priority
+            />
+          </div>
+        </div>
         <h1
           className="text-4xl font-bold tracking-tight mb-3"
           style={{ color: "var(--foreground)" }}

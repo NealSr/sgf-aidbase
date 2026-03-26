@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 /**
  * Shared site header — sticky, appears on every page via root layout.
@@ -15,9 +16,14 @@ export default function Header() {
     >
       {/* Wordmark / logo — links to homepage */}
       <Link href="/" className="flex items-center gap-3">
-        <span className="text-2xl" role="img" aria-label="SGF AidBase logo">
-          🤝
-        </span>
+        <Image
+          src="/icon.png"
+          alt="SGF AidBase logo"
+          width={32}
+          height={32}
+          className="h-8 w-8 rounded-md"
+          priority
+        />
         <span className="text-xl font-semibold tracking-tight">
           SGF AidBase
         </span>
