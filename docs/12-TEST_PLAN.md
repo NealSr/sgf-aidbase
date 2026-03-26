@@ -93,7 +93,7 @@ Run through this end-to-end before every deploy. Takes ~10 minutes.
 - [ ] Clicking toggle switches to "🔍 AI Search: Off"
 - [ ] With AI on: search shows AI summary card and category-matched results
 - [ ] With AI off: search shows "Showing results for: [query]" header instead of AI summary
-- [ ] With AI off: results come from keyword matching (faster, no Claude API call)
+- [ ] With AI off: results come from keyword matching (faster, no OpenAI API call)
 - [ ] Toggle state persists after page refresh (localStorage)
 - [ ] URL includes `ai=0` parameter when AI is off
 
@@ -243,7 +243,7 @@ test('category page shows resources', async ({ page }) => {
 
 ### Also Worth Adding Later
 - **Jest + React Testing Library** — unit tests for components
-- **API route tests** — test /api/search with mock Claude responses
+- **API route tests** — test /api/search with mock OpenAI responses
 - **Lighthouse CI** — automated accessibility and performance audits
 - **Supabase type generation** — `npx supabase gen types` for type-safe queries
 

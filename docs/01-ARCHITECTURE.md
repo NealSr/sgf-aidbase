@@ -34,8 +34,8 @@
               │                  │
               ▼                  ▼
 ┌──────────────────┐   ┌──────────────────┐
-│  Anthropic API   │   │    Supabase      │
-│  (Claude Sonnet) │   │  (PostgreSQL)    │
+│    OpenAI API    │   │    Supabase      │
+│  (structured AI) │   │  (PostgreSQL)    │
 │                  │   │                  │
 │  Smart matching  │   │  Resources table │
 │  Hours reasoning │   │  Categories table│
@@ -50,15 +50,15 @@
 2. Browser requests geolocation permission (optional)
 3. Frontend sends POST to `/api/search` with `{ query, latitude?, longitude? }`
 4. API route checks: is this a direct category click or a natural language query?
-   - **Direct category click** → Query Supabase directly, skip Claude API
+   - **Direct category click** → Query Supabase directly, skip OpenAI API
    - **Natural language query** → Continue to step 5
-5. API route sends query to Claude API (Sonnet model) with:
+5. API route sends query to the OpenAI API with:
    - The user's query
    - Current date/time (for hours reasoning)
    - User's lat/lon if provided (for proximity awareness)
    - Category definitions
    - Instructions to return structured JSON with empathetic summary
-6. Claude responds with: `{ category, confidence, summary, secondary_category }`
+6. OpenAI responds with structured JSON containing the matched category and summary
 7. API route queries Supabase for all active resources in matched category
 8. Results returned to frontend with lat/lon per resource
 9. Frontend calculates distance (Haversine) and adds walking context labels
@@ -73,7 +73,7 @@
 | 3+ mi | You'll likely need transportation | 🚗 |
 
 ## Hours Reasoning
-Hours are stored as free text in the database (e.g., "Mon-Thu 9:00 AM - 1:30 PM"). Instead of parsing these into structured time ranges, the current date/time is passed to Claude at query time. Claude reads the hours text and reasons about what's currently open, noting when closed resources will open next. This avoids complex time parsing while delivering good-enough results for MVP.
+Hours are stored as free text in the database (e.g., "Mon-Thu 9:00 AM - 1:30 PM"). Instead of parsing these into structured time ranges, the current date/time is passed to OpenAI at query time. The model reads the hours text and reasons about what's currently open, noting when closed resources will open next. This avoids complex time parsing while delivering good-enough results for MVP.
 
 ## Tech Stack
 | Layer | Technology | Purpose |
@@ -82,7 +82,7 @@ Hours are stored as free text in the database (e.g., "Mon-Thu 9:00 AM - 1:30 PM"
 | Styling | Tailwind CSS | Mobile-first responsive design |
 | Language | TypeScript | Type safety across the codebase |
 | Database | Supabase (PostgreSQL, us-east-2 Ohio) | Resource data, full-text search, feedback |
-| AI Matching | Anthropic Claude API (Sonnet) | Natural language query understanding |
+| AI Matching | OpenAI API | Natural language query understanding |
 | Geocoding | OpenStreetMap Nominatim | One-time batch script to populate lat/lon |
 | Distance | Haversine formula (client-side JS) | Calculate user-to-resource distance |
 | Hosting Primary | Vercel | Auto-deploy from GitHub, SSL, CDN |
@@ -129,7 +129,7 @@ sgf-aidbase/
 │   └── LoadingSpinner.tsx
 ├── lib/
 │   ├── supabase.ts             # Supabase client + TypeScript types
-│   ├── anthropic.ts            # Claude API helper functions
+│   ├── ai.ts                   # OpenAI helper functions
 │   ├── distance.ts             # Haversine formula + distance labels
 │   ├── location.ts             # Browser geolocation wrapper
 │   └── types.ts                # Shared type definitions
@@ -151,23 +151,24 @@ sgf-aidbase/
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-ANTHROPIC_API_KEY=sk-ant-...     # Server-side only — NEVER NEXT_PUBLIC_
+OPENAI_API_KEY=sk-proj-...       # Server-side only — NEVER NEXT_PUBLIC_
+OPENAI_MODEL=gpt-5-mini
 ADMIN_PASSWORD=...               # For /admin page
 ```
 
 ## Security Considerations
-- Anthropic API key is server-side only (never prefixed with NEXT_PUBLIC_)
+- OpenAI API key is server-side only (never prefixed with NEXT_PUBLIC_)
 - Supabase Row Level Security: public read-only on resources/categories, insert-only on feedback
 - No user authentication for public features = no user data to protect
 - Rate limiting on /api/search (10 req/min per IP) to prevent abuse
 - Honeypot field on feedback form for spam prevention (no CAPTCHA — don't block people in crisis)
-- Input sanitization on search queries before passing to Claude API
+- Input sanitization on search queries before passing to OpenAI
 - Admin page uses simple password check (env var), not persistent auth
 
 ## Fallback Strategy
-1. Claude API invalid JSON → fall back to Supabase full-text search
-2. Claude API timeout (>5s) → fall back to Supabase full-text search
-3. Claude API error → fall back to Supabase full-text search
+1. OpenAI invalid JSON → fall back to Supabase full-text search
+2. OpenAI timeout (>5s) → fall back to Supabase full-text search
+3. OpenAI error → fall back to Supabase full-text search
 4. User declines geolocation → show results without distance, no penalty
 5. Vercel down → switch demo URL to Amplify deployment
 6. Always show results — never show the user an error page
