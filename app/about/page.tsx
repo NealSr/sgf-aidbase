@@ -48,9 +48,10 @@ export default function AboutPage() {
           </p>
           <p>
             We used Traction Studio AI by Codefi to validate the problem,
-            Claude by Anthropic to architect and build the solution, and
-            feedback from Springfield librarians and community organizations to
-            make sure we got it right.
+            Claude to help shape the early solution blueprint, OpenAI to power
+            the current AI search experience, and feedback from Springfield
+            librarians and community organizations to make sure we got it
+            right.
           </p>
         </Section>
 
@@ -67,7 +68,8 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-wrap gap-4 mt-4">
             <CreditLink href="https://codefiworks.com" label="Codefi" />
-            <CreditLink href="https://www.anthropic.com" label="Anthropic" />
+            <CreditLink href="https://www.anthropic.com" label="Claude" />
+            <CreditLink href="https://openai.com" label="OpenAI" />
             <CreditLink
               href="https://sgftechcouncil.com"
               label="Springfield Tech Council"

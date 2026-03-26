@@ -21,15 +21,15 @@ This project was shaped with both Claude and OpenAI tools. Claude contributed to
          │               │
          ▼               ▼
 ┌─────────────────────────────────────────────────────┐
-│              NEXT.JS APP (Vercel / Amplify)          │
+│          NEXT.JS APP (Vercel / Amplify)              │
 │                                                      │
 │  ┌──────────────────────────────────────────────┐   │
 │  │              API Routes (/api/*)              │   │
 │  │                                               │   │
 │  │  /api/search    — AI-powered query matching   │   │
 │  │                   + location + hours awareness │   │
-│  │  /api/resources — CRUD for resource listings  │   │
-│  │  /api/feedback  — Community feedback intake    │   │
+│  │  /api/admin/verify — Admin password check      │   │
+│  │  /api/feedback     — Community feedback intake │   │
 │  └──────────┬──────────────────┬─────────────────┘   │
 │             │                  │                      │
 └─────────────┼──────────────────┼─────────────────────┘
@@ -87,8 +87,7 @@ Hours are stored as free text in the database (e.g., "Mon-Thu 9:00 AM - 1:30 PM"
 | AI Matching | OpenAI API | Natural language query understanding |
 | Geocoding | OpenStreetMap Nominatim | One-time batch script to populate lat/lon |
 | Distance | Haversine formula (client-side JS) | Calculate user-to-resource distance |
-| Hosting Primary | Vercel | Auto-deploy from GitHub, SSL, CDN |
-| Hosting Backup | AWS Amplify | Same repo, fallback deployment |
+| Hosting | Vercel + AWS Amplify | Auto-deploy options from GitHub |
 | DNS | Cloudflare | DNS management for sgfaidbase.org |
 | SSL | Let's Encrypt (auto via Vercel) | HTTPS by default |
 
@@ -113,30 +112,26 @@ sgf-aidbase/
 │   ├── feedback/
 │   │   └── page.tsx            # Community feedback form
 │   ├── admin/
-│   │   └── page.tsx            # Password-protected admin for resource CRUD
+│   │   └── page.tsx            # Password-protected internal admin page
+│   ├── nearby/
+│   │   └── page.tsx            # Nearby resources using geolocation
+│   ├── components/             # Shared UI components used by routes
 │   └── api/
+│       ├── admin/
+│       │   └── verify/
+│       │       └── route.ts    # Admin password verification
 │       ├── search/
 │       │   └── route.ts        # AI-powered search endpoint
-│       ├── resources/
-│       │   └── route.ts        # Resource listing endpoint
 │       └── feedback/
 │           └── route.ts        # Feedback submission endpoint
-├── components/
-│   ├── SearchBar.tsx
-│   ├── CategoryCard.tsx
-│   ├── ResourceCard.tsx        # Includes distance label display
-│   ├── ResourceDetail.tsx
-│   ├── Header.tsx
-│   ├── Footer.tsx              # Includes disclaimer + crisis numbers
-│   └── LoadingSpinner.tsx
 ├── lib/
-│   ├── supabase.ts             # Supabase client + TypeScript types
+│   ├── ai-config.ts            # Shared AI timeout/runtime constants
 │   ├── ai.ts                   # OpenAI helper functions
+│   ├── crisis.ts               # Crisis phrase detection and response data
 │   ├── distance.ts             # Haversine formula + distance labels
+│   ├── hours.ts                # Hours formatting and open/closed helpers
 │   ├── location.ts             # Browser geolocation wrapper
-│   └── types.ts                # Shared type definitions
-├── scripts/
-│   └── geocode-resources.mjs   # One-time Nominatim geocoding script
+│   └── supabase.ts             # Supabase client helpers
 ├── docs/                       # Blueprint documentation (for AI judge + humans)
 ├── public/                     # Static assets (currently empty; app icon lives in /app)
 ├── .env.local                  # Environment variables (not committed)
@@ -171,5 +166,5 @@ ADMIN_PASSWORD=...               # For /admin page
 2. OpenAI timeout (>20s by default, configurable via env) → fall back to Supabase full-text search
 3. OpenAI error → fall back to Supabase full-text search
 4. User declines geolocation → show results without distance, no penalty
-5. Vercel down → switch demo URL to Amplify deployment
+5. Always keep a preloaded backup tab during demos
 6. Always show results — never show the user an error page

@@ -29,7 +29,7 @@ SGF AidBase is a simple, accessible front door to community resources. Users can
 | Styling | Tailwind CSS | Responsive, mobile-first design |
 | Database | Supabase (PostgreSQL) | Resource listings with full-text search |
 | AI Matching | OpenAI API | Natural language understanding for search queries |
-| Hosting | Vercel + AWS Amplify | Dual deployment for reliability |
+| Hosting | Vercel + AWS Amplify | Primary deployment on Vercel with Amplify also configured |
 | Domain | sgfaidbase.org | SSL via Let's Encrypt (automatic) |
 
 ## Architecture
@@ -64,7 +64,7 @@ User types "I need help with groceries"
 - [x] Resource detail pages with call/map/website links
 - [x] AI toggle — search with or without AI assistance
 - [x] Mobile-first responsive design
-- [x] Voice input via Web Speech API
+- [x] Voice input on compatible browsers/devices
 - [x] Community feedback form for corrections and suggestions
 - [x] Verified resource data from direct outreach to Springfield organizations
 - [x] Crisis safety net — 988 and 911 prominently displayed
@@ -72,7 +72,7 @@ User types "I need help with groceries"
 ### Roadmap (Post-Vibeathon)
 - [ ] Multilingual support (Spanish and other languages via OpenAI API)
 - [ ] Additional categories: mental health, job training, childcare
-- [ ] Admin portal for organizations to update their own listings
+- [ ] Organization-facing self-service admin portal
 - [ ] PWA support (Add to Home Screen)
 - [ ] Community board for mutual aid posts
 - [ ] Map view of nearby resources
@@ -90,13 +90,16 @@ sgf-aidbase/
 │   ├── resource/[id]/page.tsx  # Resource detail
 │   ├── feedback/page.tsx       # Community feedback form
 │   ├── about/page.tsx          # About Ctrl+Aid+Shift
+│   ├── nearby/page.tsx         # Nearby resources using geolocation
+│   ├── admin/page.tsx          # Password-protected internal admin page
+│   ├── components/             # Shared UI components used across routes
 │   └── api/
+│       ├── admin/verify/route.ts # Admin password check
 │       ├── search/route.ts     # AI matching endpoint
 │       └── feedback/route.ts   # Feedback submission endpoint
-├── components/                 # Reusable UI components
-├── lib/                        # Supabase client, OpenAI helpers, shared config
+├── lib/                        # Supabase client, OpenAI helpers, crisis/shared config
 ├── docs/                       # Architecture & planning documents
-├── public/                     # Static assets
+├── public/                     # Reserved for static assets
 └── README.md
 ```
 
@@ -109,7 +112,7 @@ This project was built during Springfield Tech Week 2026 as part of the Vibeatho
 2. **Architecture** — Used AI-assisted planning for architecture decisions, data modeling, and prompt engineering
 3. **Market Research** — Visited Springfield organizations in person. Called phone numbers. Verified hours. Talked to social workers and case managers about how people find help today.
 4. **Development** — Used structured blueprint documents and AI-assisted coding with both Claude and OpenAI tools to move quickly while keeping the app grounded in verified local data
-5. **Deployment** — Dual deployment to Vercel (primary) and AWS Amplify (backup) from a single GitHub repo
+5. **Deployment** — Vercel deployment with Amplify also configured from the same GitHub repo
 
 ### Design Principles
 - **Directory, not provider** — We connect people to help. We don't diagnose, counsel, or promise outcomes.
