@@ -38,7 +38,7 @@ The architecture supports adding more categories later, but for Thursday's demo:
 | AI Hours Reasoning | OpenAI reads hours text + current time at query | Avoids complex time parsing |
 | Location | Tier 2 — distance + walking context labels | Haversine formula, browser geolocation |
 | Geocoding | OpenStreetMap Nominatim batch script | Free, one-time run |
-| Hosting | Vercel (sgfaidbase.org) | Auto SSL, made for Next.js |
+| Hosting | Vercel (sgfaidbase.org) + AWS Amplify | Primary deployment plus additional hosted path |
 | Admin | Password-protected internal page | Supports directory maintenance |
 | Spam Prevention | Honeypot + rate limiting (no CAPTCHA) | Don't block people in crisis |
 

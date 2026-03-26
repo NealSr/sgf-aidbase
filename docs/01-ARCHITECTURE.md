@@ -21,7 +21,7 @@ This project was shaped with both Claude and OpenAI tools. Claude contributed to
          │               │
          ▼               ▼
 ┌─────────────────────────────────────────────────────┐
-│                NEXT.JS APP (Vercel)                  │
+│          NEXT.JS APP (Vercel / Amplify)              │
 │                                                      │
 │  ┌──────────────────────────────────────────────┐   │
 │  │              API Routes (/api/*)              │   │
@@ -87,7 +87,7 @@ Hours are stored as free text in the database (e.g., "Mon-Thu 9:00 AM - 1:30 PM"
 | AI Matching | OpenAI API | Natural language query understanding |
 | Geocoding | OpenStreetMap Nominatim | One-time batch script to populate lat/lon |
 | Distance | Haversine formula (client-side JS) | Calculate user-to-resource distance |
-| Hosting | Vercel | Auto-deploy from GitHub, SSL, CDN |
+| Hosting | Vercel + AWS Amplify | Auto-deploy options from GitHub |
 | DNS | Cloudflare | DNS management for sgfaidbase.org |
 | SSL | Let's Encrypt (auto via Vercel) | HTTPS by default |
 
