@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { OPENAI_TIMEOUT_MS } from "@/lib/ai-config";
 
 export const VALID_CATEGORIES = [
   "food-assistance",
@@ -16,8 +17,6 @@ export type SearchAiResult = {
   secondary_category: ValidCategory | null;
   search_keywords: string[];
 };
-
-const OPENAI_TIMEOUT_MS = Number(process.env.OPENAI_TIMEOUT_MS ?? 20_000);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
