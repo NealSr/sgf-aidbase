@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useRef, useCallback, useSyncExternalStore, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useSyncExternalStore } from "react";
 
 const EXAMPLE_QUERIES = [
   "I need food for my family",
@@ -39,17 +39,18 @@ export default function SearchForm({
     textarea.style.height = `${nextHeight}px`;
   }, []);
 
-  const isClient = useSyncExternalStore(
+  const storedUseAI = useSyncExternalStore(
     () => () => {},
-    () => true,
+    () => localStorage.getItem("sgf-ai-search") !== "off",
+    () => true
+  );
+  const hasSpeechSupport = useSyncExternalStore(
+    () => () => {},
+    () => "SpeechRecognition" in window || "webkitSpeechRecognition" in window,
     () => false
   );
 
-  const useAI =
-    useAIOverride ?? (isClient ? localStorage.getItem("sgf-ai-search") !== "off" : true);
-  const hasSpeechSupport =
-    isClient &&
-    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+  const useAI = useAIOverride ?? storedUseAI;
 
   // Auto-submit: navigate to search with the given text
   const navigateToSearch = useCallback(
@@ -140,6 +141,21 @@ export default function SearchForm({
     resizeTextarea();
   }
 
+  function handleTextareaKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key !== "Enter" || e.shiftKey) return;
+
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setSubmitError("Please describe what you need help with.");
+      return;
+    }
+
+    setSubmitError(null);
+    setIsSubmitting(true);
+    router.push(buildSearchUrl(trimmed));
+  }
+
   useEffect(() => {
     resizeTextarea();
   }, [query, resizeTextarea]);
@@ -172,6 +188,7 @@ export default function SearchForm({
             onChange={(e) => {
               handleQueryChange(e.target.value);
             }}
+            onKeyDown={handleTextareaKeyDown}
             rows={2}
             placeholder="Describe what you're looking for..."
             className="min-h-[88px] w-full flex-1 resize-none px-4 py-3 rounded-xl border text-base outline-none transition-colors sm:min-h-[56px]"
