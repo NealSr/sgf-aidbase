@@ -5,17 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, Suspense, useCallback } from "react";
 import SearchForm from "@/app/components/SearchForm";
 import { Resource } from "@/lib/supabase";
+import { CRISIS_RESPONSE, CrisisResource, detectCrisis } from "@/lib/crisis";
 import { calculateDistance } from "@/lib/distance";
 import { getDistanceLabel } from "@/lib/location";
 import PhoneLink from "@/app/components/PhoneLink";
 import HoursIndicator from "@/app/components/HoursIndicator";
-
-/** Crisis resource returned when crisis language is detected */
-type CrisisResource = {
-  name: string;
-  phone: string | null;
-  description: string;
-};
 
 type SearchResult = {
   summary: string;
@@ -54,11 +48,12 @@ function SearchResults({
   useAI: boolean;
 }) {
   const requestKey = `${query}::${useAI ? "ai" : "plain"}`;
+  const isCrisisQuery = detectCrisis(query);
 
   // Only show loading state if there's a query to search for
-  const [loading, setLoading] = useState(!!query);
-  const [result, setResult] = useState<SearchResult | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(!!query && !isCrisisQuery);
+  const [apiResult, setApiResult] = useState<SearchResult | null>(null);
+  const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
@@ -69,6 +64,15 @@ function SearchResults({
   const activeRequestKey = useRef<string | null>(null);
   const activeRequestController = useRef<AbortController | null>(null);
   const locationEnhancedKeys = useRef(new Set<string>());
+  const result: SearchResult | null = isCrisisQuery
+    ? {
+        summary: CRISIS_RESPONSE.summary,
+        resources: [],
+        crisis: true,
+        crisisResources: [...CRISIS_RESPONSE.resources],
+      }
+    : apiResult;
+  const errorMessage = isCrisisQuery ? null : apiErrorMessage;
 
   /** POST to /api/search and update state with results */
   const fetchResults = useCallback(function fetchResults(
@@ -84,7 +88,7 @@ function SearchResults({
     setLoading(true);
     setLoadingPhase("starting");
     setLoadingMessageIndex(0);
-    setErrorMessage(null);
+    setApiErrorMessage(null);
 
     fetch("/api/search", {
       method: "POST",
@@ -114,22 +118,22 @@ function SearchResults({
         // When crisis is detected, the API returns crisis resources in
         // the `resources` field. Remap so the UI can distinguish them.
         if (data.crisis) {
-          setResult({
+          setApiResult({
             summary: data.summary,
             resources: [],
             crisis: true,
             crisisResources: data.resources,
           });
         } else {
-          setResult(data);
+          setApiResult(data);
         }
         setLoading(false);
       })
       .catch((error: unknown) => {
         if (activeRequestKey.current !== nextRequestKey) return;
         if (error instanceof DOMException && error.name === "AbortError") return;
-        setResult(null);
-        setErrorMessage(
+        setApiResult(null);
+        setApiErrorMessage(
           error instanceof Error
             ? error.message
             : "Search timed out. Please try again."
@@ -139,7 +143,7 @@ function SearchResults({
   }, [useAI]);
 
   useEffect(() => {
-    if (!query) return;
+    if (!query || isCrisisQuery) return;
 
     const timeoutId = setTimeout(() => {
       fetchResults(query, "base", null);
@@ -149,10 +153,10 @@ function SearchResults({
       clearTimeout(timeoutId);
       activeRequestController.current?.abort();
     };
-  }, [fetchResults, query, requestKey]);
+  }, [fetchResults, isCrisisQuery, query, requestKey]);
 
   useEffect(() => {
-    if (!query || !("geolocation" in navigator)) return;
+    if (!query || isCrisisQuery || !("geolocation" in navigator)) return;
     if (locationEnhancedKeys.current.has(requestKey)) return;
 
     let cancelled = false;
@@ -174,7 +178,7 @@ function SearchResults({
     return () => {
       cancelled = true;
     };
-  }, [fetchResults, query, requestKey]);
+  }, [fetchResults, isCrisisQuery, query, requestKey]);
 
   useEffect(() => {
     if (!loading) return;

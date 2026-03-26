@@ -5,7 +5,7 @@ SGF AidBase is a community resource navigator for Springfield, Missouri. People 
 
 ## Team
 - **Team Name:** Ctrl+Aid+Shift (solo — one human + AI collaboration)
-- **Team Members:** Neal Richardson Sr + Claude Code
+- **Team Members:** Neal Richardson Sr + AI collaboration using both Claude and OpenAI tools
 - **Competition:** Springfield, MO Vibeathon (Springfield Tech Week, March 2026)
 - **Sponsor:** vibeathon.us Powered by Codefi
 - **Problem Category:** Bring Your Own Startup Idea — MVP in under a week
@@ -42,6 +42,8 @@ The architecture supports adding more categories later, but for Thursday's demo:
 | Hosting Backup | AWS Amplify | Same repo, fallback |
 | Admin | Password-protected page, Supabase REST | Data freshness is #1 need |
 | Spam Prevention | Honeypot + rate limiting (no CAPTCHA) | Don't block people in crisis |
+
+Both Claude and OpenAI tools were used during the project: Claude helped with early setup and planning artifacts, and OpenAI powers the live AI search experience while also supporting later implementation refinements.
 
 ## Market Research Validation
 - Interviewed reference desk librarian Lisa at Springfield-Greene County Library
