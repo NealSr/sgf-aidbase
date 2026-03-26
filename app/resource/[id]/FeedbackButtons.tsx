@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 export default function FeedbackButtons() {
@@ -7,7 +8,6 @@ export default function FeedbackButtons() {
 
   function handleFeedback(type: "up" | "down") {
     setSelected(type);
-    console.log(`User feedback: thumbs ${type}`);
   }
 
   return (
@@ -25,9 +25,24 @@ export default function FeedbackButtons() {
         Was this helpful?
       </p>
       {selected ? (
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Thanks for your feedback!
-        </p>
+        selected === "up" ? (
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Thanks for your feedback!
+          </p>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              Thanks for telling us. We welcome your feedback.
+            </p>
+            <Link
+              href="/feedback"
+              className="text-sm font-medium underline"
+              style={{ color: "var(--accent)" }}
+            >
+              Share details on the feedback form
+            </Link>
+          </div>
+        )
       ) : (
         <div className="flex justify-center gap-4">
           <button

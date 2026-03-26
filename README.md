@@ -92,10 +92,9 @@ sgf-aidbase/
 │   ├── about/page.tsx          # About Ctrl+Aid+Shift
 │   └── api/
 │       ├── search/route.ts     # AI matching endpoint
-│       ├── resources/route.ts  # Resource listing endpoint
 │       └── feedback/route.ts   # Feedback submission endpoint
 ├── components/                 # Reusable UI components
-├── lib/                        # Supabase client, Claude helpers, types
+├── lib/                        # Supabase client, OpenAI helpers, shared config
 ├── docs/                       # Architecture & planning documents
 ├── public/                     # Static assets
 └── README.md
@@ -107,9 +106,9 @@ This project was built during Springfield Tech Week 2026 as part of the Vibeatho
 
 ### Process
 1. **Validation** — Used Traction Studio AI (by Codefi) to validate the problem statement and identify target users
-2. **Architecture** — Used Claude (Anthropic) for architecture decisions, data modeling, and prompt engineering
+2. **Architecture** — Used AI-assisted planning for architecture decisions, data modeling, and prompt engineering
 3. **Market Research** — Visited Springfield organizations in person. Called phone numbers. Verified hours. Talked to social workers and case managers about how people find help today.
-4. **Development** — Used Claude in VSCode for AI-assisted code generation from structured blueprint documents
+4. **Development** — Used structured blueprint documents and AI-assisted coding with both Claude and OpenAI tools to move quickly while keeping the app grounded in verified local data
 5. **Deployment** — Dual deployment to Vercel (primary) and AWS Amplify (backup) from a single GitHub repo
 
 ### Design Principles
@@ -150,7 +149,8 @@ npm run dev
 NEXT_PUBLIC_SUPABASE_URL=https://your-unique-domain.supabase.co/
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 OPENAI_API_KEY=sk-proj-xxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-OPENAI_MODEL=gpt-5-mini
+OPENAI_MODEL=gpt-5-nano
+OPENAI_TIMEOUT_MS=20000
 ADMIN_PASSWORD=your_admin_page_password
 ```
 
@@ -172,6 +172,7 @@ MIT
 
 - The incredible nonprofits of Springfield, MO who do the real work every day
 - [Codefi](https://codefiworks.com) and [Traction Studio AI](https://tractionstudio.ai) for the validation framework
-- [Anthropic](https://anthropic.com) for Claude — the AI that helped architect, build, and power this app
+- Claude for helping shape the initial project setup, planning artifacts, and early build momentum
+- OpenAI for powering the current AI search experience and later implementation refinements
 - [Springfield Tech Council](https://sgftech.org) for organizing Springfield Tech Week
 - Everyone who took 5 minutes during market research to answer questions and share data

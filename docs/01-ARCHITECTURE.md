@@ -1,5 +1,7 @@
 # SGF AidBase — Architecture
 
+This project was shaped with both Claude and OpenAI tools. Claude contributed to early setup and planning artifacts, while OpenAI powers the live search flow and later implementation refinements.
+
 ## System Overview
 
 ```
@@ -94,7 +96,7 @@ Hours are stored as free text in the database (e.g., "Mon-Thu 9:00 AM - 1:30 PM"
 
 ```
 sgf-aidbase/
-├── CLAUDE.md                   # Claude Code project context (auto-read)
+├── CLAUDE.md                   # Project context file retained for tool compatibility and project history
 ├── app/
 │   ├── layout.tsx              # Root layout — header, footer, meta tags
 │   ├── page.tsx                # Homepage: hero + search bar + category cards
@@ -136,9 +138,7 @@ sgf-aidbase/
 ├── scripts/
 │   └── geocode-resources.mjs   # One-time Nominatim geocoding script
 ├── docs/                       # Blueprint documentation (for AI judge + humans)
-├── public/
-│   ├── logo.svg
-│   └── og-image.png
+├── public/                     # Static assets (currently empty; app icon lives in /app)
 ├── .env.local                  # Environment variables (not committed)
 ├── .env.example                # Template showing required env vars
 ├── tailwind.config.ts
@@ -152,7 +152,8 @@ sgf-aidbase/
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 OPENAI_API_KEY=sk-proj-...       # Server-side only — NEVER NEXT_PUBLIC_
-OPENAI_MODEL=gpt-5-mini
+OPENAI_MODEL=gpt-5-nano
+OPENAI_TIMEOUT_MS=20000
 ADMIN_PASSWORD=...               # For /admin page
 ```
 
@@ -167,7 +168,7 @@ ADMIN_PASSWORD=...               # For /admin page
 
 ## Fallback Strategy
 1. OpenAI invalid JSON → fall back to Supabase full-text search
-2. OpenAI timeout (>5s) → fall back to Supabase full-text search
+2. OpenAI timeout (>20s by default, configurable via env) → fall back to Supabase full-text search
 3. OpenAI error → fall back to Supabase full-text search
 4. User declines geolocation → show results without distance, no penalty
 5. Vercel down → switch demo URL to Amplify deployment
